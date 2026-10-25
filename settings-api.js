@@ -441,9 +441,13 @@ export function registerDqdSettingsApi(context, projectDir, configPath, stateDir
 
       const pythonPath = pythonEnvironmentPython();
       if (!existsSync(pythonPath)) throw new Error(`Python 环境创建后未找到解释器: ${pythonPath}`);
+      // Windows 不提供 IANA 时区库，必须安装项目声明的 tzdata 等运行依赖。
+      await runProcess(uvPath, [
+        'pip', 'install', '--python', pythonPath, '--requirements', join(projectDir, 'pyproject.toml'),
+      ], { cwd: stateDir, env: pythonEnv });
       const versionResult = await runProcess(pythonPath, [
         '-c',
-        'import sys; print(f"{sys.version_info.major}.{sys.version_info.minor}.{sys.version_info.micro}")',
+        'import sys; from zoneinfo import ZoneInfo; ZoneInfo("Asia/Shanghai"); print(f"{sys.version_info.major}.{sys.version_info.minor}.{sys.version_info.micro}")',
       ], { cwd: stateDir, env: pythonEnv });
       const pythonVersion = versionResult.stdout.trim();
       if (!/^3\.11\.\d+$/.test(pythonVersion)) throw new Error(`创建的 Python 版本不符合要求: ${pythonVersion}`);

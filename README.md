@@ -22,7 +22,7 @@ Electron 桌面版先从托盘菜单完全退出 DSH，再安装到桌面专用 
 dsh plugin --profile desktop add dsh-dqd-scroll
 ```
 
-安装后启动 DSH，打开“设置 → 刷懂球帝”，选择关注球队、填写关注内容和运行时间，再点击“准备运行环境”。首次准备会在本机 DSH 用户数据目录安装经过 SHA-256 校验的 uv 和 Python 3.11，并初始化球队数据库；不需要预装 Python。该步骤需要网络访问 GitHub，Windows、macOS 和常见 Linux x64/ARM64 环境受支持。
+安装后启动 DSH，打开“设置 → 刷懂球帝”，选择关注球队、填写关注内容和运行时间，再点击“准备运行环境”。首次准备会在本机 DSH 用户数据目录安装经过 SHA-256 校验的 uv、Python 3.11 和项目声明的 Python 依赖，并初始化球队数据库；不需要预装 Python。该步骤需要网络访问 GitHub 和 PyPI，Windows、macOS 和常见 Linux x64/ARM64 环境受支持。
 
 配置、Python 环境、SQLite 数据库、运行状态和日报都保存在 DSH 用户数据目录的 `dqd-scroll/` 下。当前动态日报支持 `teams.json` 中列出的 20 支英超球队；名单和赛程在线抓取尚未实现。
 
@@ -104,7 +104,7 @@ conda env create -f environment.yml
 conda activate dqd
 ```
 
-`environment.yml` 会创建 Python 3.11 环境，并通过 `pip install -e .` 将当前项目安装到环境中。项目当前只使用 Python 标准库；SQLite 由标准库 `sqlite3` 提供。
+`environment.yml` 会创建 Python 3.11 环境，并通过 `pip install -e .` 将当前项目及其依赖安装到环境中。Python 运行依赖 `tzdata` 提供 IANA 时区数据；SQLite 由标准库 `sqlite3` 提供。DSH 设置页的“准备运行环境”也会安装 `pyproject.toml` 声明的依赖并检查 `Asia/Shanghai` 时区；从旧版升级后请重新点击一次。
 
 如果 `dqd` 环境已经创建，但尚未安装项目，或需要在已有环境中重新安装，在项目根目录运行：
 

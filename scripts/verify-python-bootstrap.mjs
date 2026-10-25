@@ -47,9 +47,13 @@ try {
     : join(pythonEnvironmentDir, 'bin', 'python');
   if (!existsSync(pythonPath)) throw new Error(`Python 环境创建后未找到解释器: ${pythonPath}`);
 
+  runProcess(uvPath, [
+    'pip', 'install', '--python', pythonPath, '--requirements', join(projectDir, 'pyproject.toml'),
+  ], { cwd: stateDir, env: pythonEnvironment });
+
   const pythonVersion = runProcess(pythonPath, [
     '-c',
-    'import sys; print(f"{sys.version_info.major}.{sys.version_info.minor}.{sys.version_info.micro}")',
+    'import sys; from zoneinfo import ZoneInfo; ZoneInfo("Asia/Shanghai"); print(f"{sys.version_info.major}.{sys.version_info.minor}.{sys.version_info.micro}")',
   ], { cwd: stateDir, env: pythonEnvironment }).trim();
   if (!/^3\.11\.\d+$/.test(pythonVersion)) throw new Error(`创建的 Python 版本不符合要求: ${pythonVersion}`);
 
