@@ -25,6 +25,7 @@ window.__ModuleLoader__.load({
     };
 
     const getSettings = () => request('/settings');
+    const getLogs = () => request('/logs');
     const saveSettings = (settings) => request('/settings', {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
@@ -60,8 +61,12 @@ window.__ModuleLoader__.load({
       const [pythonEnvironment, setPythonEnvironment] = React.useState(null);
       const [availableTeamNames, setAvailableTeamNames] = React.useState([]);
       const [dailyRunTime, setDailyRunTime] = React.useState(null);
+      const [executionMethod, setExecutionMethod] = React.useState(null);
       const [teamNamesText, setTeamNamesText] = React.useState(null);
       const [interestsText, setInterestsText] = React.useState(null);
+      const [scheduleState, setScheduleState] = React.useState(null);
+      const [logText, setLogText] = React.useState('');
+      const [logPath, setLogPath] = React.useState('');
       const [loadingError, setLoadingError] = React.useState('');
       const [message, setMessage] = React.useState('');
       const [messageTone, setMessageTone] = React.useState('');
@@ -75,8 +80,17 @@ window.__ModuleLoader__.load({
           setPythonEnvironment(response.pythonEnvironment);
           setAvailableTeamNames(response.availableTeamNames);
           setDailyRunTime(response.settings.dailyRunTime);
+          setExecutionMethod(response.settings.executionMethod);
           setTeamNamesText(response.settings.teamNames.join('\n'));
           setInterestsText(response.settings.interests.join('\n'));
+          setScheduleState(response.scheduleState);
+          setLogPath(response.logPath);
+          getLogs().then((logResponse) => {
+            if (!active) return;
+            setLogText(logResponse.log);
+          }).catch((error) => {
+            if (active) setLoadingError(error.message);
+          });
         }).catch((error) => {
           if (active) setLoadingError(error.message);
         });
@@ -88,6 +102,30 @@ window.__ModuleLoader__.load({
       const showMessage = (text, tone) => {
         setMessage(text);
         setMessageTone(tone);
+      };
+
+      const refreshLogs = async () => {
+        try {
+          const [settingsResponse, logResponse] = await Promise.all([getSettings(), getLogs()]);
+          setScheduleState(settingsResponse.scheduleState);
+          setLogText(logResponse.log);
+          setLogPath(logResponse.logPath);
+        } catch (error) {
+          showMessage(error.message, 'error');
+        }
+      };
+
+      const scheduleSummary = () => {
+        if (!scheduleState) return '任务状态尚未同步。';
+        if (!scheduleState.registered) {
+          if (scheduleState.error) return `自动调度未启用：${scheduleState.error}`;
+          return '自动调度未启用。';
+        }
+        let schedulerName = '自动调度';
+        if (scheduleState.scheduler === 'windows-task-scheduler') schedulerName = 'Windows 任务计划';
+        if (scheduleState.scheduler === 'plugin-interval') schedulerName = 'DSH 插件定时器';
+        if (!scheduleState.last_status) return `${schedulerName}已启用：${scheduleState.daily_run_time}，${scheduleState.execution_method}。`;
+        return `${schedulerName}已启用：${scheduleState.daily_run_time}，${scheduleState.execution_method}；上次执行状态：${scheduleState.last_status}。`;
       };
 
       const onSave = async () => {
@@ -115,12 +153,19 @@ window.__ModuleLoader__.load({
         setBusy('save');
         showMessage('', '');
         try {
-          const response = await saveSettings({ dailyRunTime, teamNames, interests });
+          const response = await saveSettings({ dailyRunTime, executionMethod, teamNames, interests });
           setSettings(response.settings);
           setDailyRunTime(response.settings.dailyRunTime);
+          setExecutionMethod(response.settings.executionMethod);
           setTeamNamesText(response.settings.teamNames.join('\n'));
           setInterestsText(response.settings.interests.join('\n'));
-          showMessage('设置已保存，调度器会在下一次检查时读取新值。', 'success');
+          setScheduleState(response.scheduleState);
+          await refreshLogs();
+          if (response.scheduleState.registered) {
+            showMessage('设置已保存，自动调度已更新。', 'success');
+          } else {
+            showMessage(`设置已保存，但自动调度未启用：${response.scheduleState.error}`, 'error');
+          }
         } catch (error) {
           showMessage(error.message, 'error');
         } finally {
@@ -134,7 +179,13 @@ window.__ModuleLoader__.load({
         try {
           const response = await installPythonEnvironment();
           setPythonEnvironment(response.pythonEnvironment);
-          showMessage(response.pythonEnvironment.output, 'success');
+          setScheduleState(response.scheduleState);
+          await refreshLogs();
+          if (response.scheduleState.registered) {
+            showMessage(`${response.pythonEnvironment.output}\n自动调度已启用。`, 'success');
+          } else {
+            showMessage(`${response.pythonEnvironment.output}\n自动调度未启用：${response.scheduleState.error}`, 'error');
+          }
         } catch (error) {
           showMessage(error.message, 'error');
         } finally {
@@ -157,7 +208,17 @@ window.__ModuleLoader__.load({
             value: dailyRunTime,
             onChange: (event) => setDailyRunTime(event.target.value),
           }),
-          h('div', { 'data-dqd-note': '' }, `按 Asia/Shanghai 时区检查。每天成功生成一次；关注内容留空时不会自动生成日报。可选球队：${availableTeamNames.join('、')}`),
+          h('label', { 'data-dqd-label': '', htmlFor: 'dqd-scroll-execution-method' }, '执行方式'),
+          h('select', {
+            id: 'dqd-scroll-execution-method',
+            'data-dqd-input': '',
+            value: executionMethod,
+            onChange: (event) => setExecutionMethod(event.target.value),
+          },
+          h('option', { value: 'command' }, '命令启动（当前方式）'),
+          h('option', { value: 'model' }, '模型执行（headless DSH，按 duty.md 执行）')),
+          h('div', { 'data-dqd-note': '' }, `Windows 使用系统任务计划，macOS 使用 DSH 插件定时器；均按 Asia/Shanghai 每天执行。macOS 需保持 DSH 运行且电脑唤醒，Windows 需电脑唤醒且用户保持登录。模型方式使用保存设置时读取到的 DSH 当前模型，修改模型后请重新保存设置。关注内容留空或 Python 环境未安装时不会启用调度。可选球队：${availableTeamNames.join('、')}`),
+          h('div', { 'data-dqd-note': '' }, scheduleSummary()),
           h('label', { 'data-dqd-label': '', htmlFor: 'dqd-scroll-team-names' }, '关注球队（每行一个懂球帝球队名称）'),
           h('textarea', {
             id: 'dqd-scroll-team-names',
@@ -199,6 +260,12 @@ window.__ModuleLoader__.load({
             disabled: Boolean(busy),
             onClick: onInstallPythonEnvironment,
           }, busy === 'python-environment' ? '安装和初始化中…' : '准备运行环境')),
+        h('div', { 'data-dqd-section': '' },
+          h('h2', { 'data-dqd-section-title': '' }, '运行日志'),
+          h('div', { 'data-dqd-note': '' }, logPath),
+          h('div', { 'data-dqd-row': '' },
+            h('button', { 'data-dqd-button': '', onClick: refreshLogs }, '刷新日志')),
+          h('pre', { 'data-dqd-output': '' }, logText || '暂无运行日志。')),
         message ? h('div', {
           'data-dqd-message': '',
           ...(messageTone ? { [`data-${messageTone}`]: '' } : {}),

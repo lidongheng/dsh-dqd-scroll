@@ -53,13 +53,14 @@ dsh plugin --profile web remove dsh-dqd-scroll
 - [x] 根据 mitmweb 与 Postman 中成功的曼城动态请求，实现只读 GET 与 `data.next` 分页跟随；按 `show_time` / `next.after` 到达用户所选开始时间后停止，检测重复 next URL，并设置 50 页上限。
 - [x] 增加 `dynamics-report`：按 DSH 设置中的球队名称从 `teams.json` 的 `dqd_name` 找到懂球帝 ID，每支球队分别生成全部动态和兴趣命中动态报告；不写数据库或原始响应文件。
 - [x] 增加动态日报时间范围入口：可手动传 `--since` 和 `--until`，不传时生成上海时区当天 00:00 到当前时刻的日报。
-- [x] 增加 DSH 插件每日调度：读取配置中的 `daily_run_time`，每天到点后运行动态日报 CLI。
+- [x] 增加跨平台每日调度：Windows 使用任务计划程序，macOS 使用 DSH 插件内的 JavaScript 定时器；两者都支持命令运行和 headless 模型执行。
+- [x] 将调度日志写入 DSH 用户数据目录，并在设置页展示最近日志和任务状态。
 - [x] 增加无需预装 Python 的首次环境准备：在 DSH 用户数据目录下载并校验 uv，安装 Python 3.11 并初始化 SQLite。
 - [x] 将插件设置、数据库、运行状态和日报移出插件安装目录；首次升级迁移原有本地配置、数据库和日报。
 
 ### 第一版使用边界
 
-- 动态日报和 DSH 每日调度属于第一版可用功能。
+- 动态日报和 Windows/macOS 每日调度属于第一版可用功能。
 - 名单与赛程目前只支持本地样本导入，不包含实时请求；球员资料、统计和能力值接口仍待核验。
 - DSH 设置页提供关注球队、关注内容、自动运行时间和本机运行环境准备；球队名称按 `teams.json` 的 `dqd_name` 精确匹配。每台机器在自己的 DSH 数据目录创建 Python 虚拟环境，并保存该机器的解释器路径。
 
@@ -159,15 +160,16 @@ python -m dqd_scroll daily-report --database data/dqd_scroll.sqlite3 --team-id 5
 
 ## 球队动态日报
 
-球队名称、动态兴趣词和插件调度设置保存在 `config.toml` 的 `[dynamics]` 中。DSH 设置 → 刷懂球帝可逐行填写关注球队和关注内容，并编辑每日运行时间。球队名称必须与 `teams.json` 中的 `dqd_name` 完全一致；程序会用该名称找到对应 `dqd_id`。填写多个名称后会逐队抓取，每支球队单独生成两份报告：`out/dynamics/<日期>/<懂球帝球队名称>-all.md` 保存所选时间范围内的全部动态；`out/dynamics/<日期>/<懂球帝球队名称>-interests.md` 只保存命中兴趣词的动态。
+球队名称、动态兴趣词和插件调度设置保存在 `config.toml` 的 `[dynamics]` 中。DSH 设置 → 刷懂球帝可逐行填写关注球队和关注内容、编辑每日运行时间，并选择命令启动或模型执行。球队名称必须与 `teams.json` 中的 `dqd_name` 完全一致；程序会用该名称找到对应 `dqd_id`。填写多个名称后会逐队抓取，每支球队单独生成两份报告：`out/dynamics/<日期>/<懂球帝球队名称>-all.md` 保存所选时间范围内的全部动态；`out/dynamics/<日期>/<懂球帝球队名称>-interests.md` 只保存命中兴趣词的动态。
 
-关注内容任一关键词出现在动态标题、描述或正文中，该条动态就会进入兴趣命中报告。时间按 `Asia/Shanghai` 解释；保存后调度器下一分钟检查时读取新设置。关注球队至少填一支；兴趣列表留空会暂停自动日报，手动运行时报错，不会自动放宽为全量动态。Python 解释器路径保存在各自机器的 DSH 数据目录，不写入项目配置。
+关注内容任一关键词出现在动态标题、描述或正文中，该条动态就会进入兴趣命中报告。Windows 使用任务计划程序，macOS 由 DSH 插件内的 JavaScript 定时器每 30 秒检查一次；运行时间按 `Asia/Shanghai` 计算，插件启用或从休眠恢复时若当天设定时间已过且当天尚未执行，会补跑一次。macOS 需要 DSH 保持运行且电脑唤醒；Windows 需要用户保持登录且电脑唤醒。命令方式直接启动 Python CLI；模型方式启动独立的 `dsh --profile headless` 会话，并让模型按 `prompts/duty.md` 执行。模型方式使用保存设置时读取到的 DSH 当前模型，修改模型后请重新保存设置。关注球队、关注内容或 Python 环境未准备好时，调度不会启用。Python 解释器路径保存在各自机器的 DSH 数据目录，不写入项目配置。
 
 ```toml
 [dynamics]
 team_names = ['曼城', '阿森纳'] # 名称需与 teams.json 中的 dqd_name 完全一致
 interests = ['伤病', '训练'] # 示例；请替换成你要关注的关键词
 daily_run_time = '21:00'
+execution_method = 'command' # command 或 model
 ```
 
 DSH 设置页的“关注球队（每行一个懂球帝球队名称）”会写入 `team_names`。可选名称来自 `teams.json`；名称不匹配或重复时会报错，不会猜测球队 ID。
@@ -188,7 +190,7 @@ python -m dqd_scroll dynamics-report --config config.toml --since 2026-10-24T11:
 
 时间按上海本地时间解释，起止时间都包含在筛选范围内。每支球队都从最新页开始采集，用动态的 `show_time` 筛选；只有 `data.next.after` 和当前整页的 `show_time` 都早于 `--since` 时才停止。每支球队最多请求 50 页；到达上限仍未到开始时间时，该队报告会标记为不完整。重复 `data.next` 会立即报错停止。动态内容只在内存处理，报告按日期和球队名称分开放入 `out/dynamics/<日期>/`；每支球队各有 `-all.md` 和 `-interests.md` 两个文件。SQLite 中没有动态表，也不会保存原始接口响应。
 
-DSH 插件必须保持运行，才能在 `daily_run_time` 到达后启动日报 CLI。插件只在 DSH 本机数据目录记录当天是否已成功生成日报和当前 Python 环境路径，不保存动态内容；命令失败时会在下一分钟重试。手动命令不依赖 DSH 定时器。
+日志文件 `dqd-scroll.log` 和调度状态 `dynamics-schedule-state.json` 保存在 DSH 用户数据目录的 `dqd-scroll/` 下，设置页会展示最近日志。Windows 任务由任务计划程序启动，macOS 任务由 DSH 插件内定时器启动；命令方式运行 Python CLI，模型方式启动一个新的 headless DSH 会话。模型模式需要 DSH 当前模型设置可用。
 
 `tools/refresh-dqd-mitm-ca.ps1` 是开发者在 LDPlayer14 上维护 mitmproxy CA 的本地脚本，不包含在用户安装包中，也不参与日报流程。
 
@@ -197,9 +199,9 @@ DSH 插件必须保持运行，才能在 `daily_run_time` 到达后启动日报 
 1. 在授权设备上通过懂球帝 APP 正常打开球队赛程和名单，抓取对应原始请求信息并记录 APP 版本、请求方法、HTTP 状态、请求头名称和认证依赖。
 2. 把赛程 URL、名单样本和真实请求证据补进 [接口契约记录](docs/api-contract.md)，确认哪些请求头或登录态确实必要。
 3. 对名单、赛程等尚未核验的接口，先确认请求契约，再实现对应只读 API 方法。
-4. 曼城动态日报由 DSH 插件按配置时间调用 Python CLI；名单、赛程在线流程仍待核验后接入。
+4. 曼城动态日报由 Windows 任务计划程序或 macOS DSH 插件定时器按配置时间启动；名单、赛程在线流程仍待核验后接入。
 
-名单和赛程的旧 Postman URL、响应内的 `season_list[].url` 都不能单独证明请求头、认证要求或调用授权。曼城动态的 DSH 定时入口已实现；其他数据功能通过项目自己的 Python 命令和脚本提供，不使用 MCP。
+名单和赛程的旧 Postman URL、响应内的 `season_list[].url` 都不能单独证明请求头、认证要求或调用授权。曼城动态的 Windows/macOS 定时入口已实现；其他数据功能通过项目自己的 Python 命令和脚本提供，不使用 MCP。
 
 ## 项目结构
 
@@ -243,4 +245,4 @@ prompts/
   duty.md                   后续的内容筛选与摘要口径
 ```
 
-数据流按职责分层：`api` 负责发请求并返回原始响应；`src/dqd_scroll/lib` 是名单、赛程和动态的校验、筛选及加工逻辑位置；`repository` 负责 SQLite 查询和写入；`workflow` 负责把这些步骤串起来。动态日报流程不调用 `repository`，动态只在内存中生成全部动态与兴趣命中两种报告。根目录的 `index.js` 负责 DSH 每日调度；插件通过调用项目的 Python CLI 使用功能，不实现 MCP，也不重复实现 Python 业务逻辑。`tools/` 只放没有现成 CLI 入口的独立开发或维护脚本。名单按 `person_id` 去重、赛程按 `match_id` 去重，动态按本次运行的 `id` 去重；重复内容冲突时会报错。曼城动态 API 和 DSH 定时入口已实现；名单、赛程及球员信息等其他实时接口仍未实现。
+数据流按职责分层：`api` 负责发请求并返回原始响应；`src/dqd_scroll/lib` 是名单、赛程和动态的校验、筛选及加工逻辑位置；`repository` 负责 SQLite 查询和写入；`workflow` 负责把这些步骤串起来。动态日报流程不调用 `repository`，动态只在内存中生成全部动态与兴趣命中两种报告。根目录的 `index.js` 负责设置页和跨平台每日调度注册；Windows 使用任务计划程序，macOS 使用插件定时器。定时入口可直接运行 Python CLI，或启动 DSH headless 模型会话。插件不重复实现 Python 业务逻辑。`tools/` 只放没有现成 CLI 入口的独立开发或维护脚本。名单按 `person_id` 去重、赛程按 `match_id` 去重，动态按本次运行的 `id` 去重；重复内容冲突时会报错。曼城动态 API 和 Windows/macOS 定时入口已实现；名单、赛程及球员信息等其他实时接口仍未实现。

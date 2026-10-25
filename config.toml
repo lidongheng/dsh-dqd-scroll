@@ -5,3 +5,4 @@ database_path = 'data/dqd_scroll.sqlite3'
 team_names = []
 interests = []
 daily_run_time = '21:00'
+execution_method = 'command'

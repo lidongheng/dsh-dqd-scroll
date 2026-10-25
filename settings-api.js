@@ -116,7 +116,7 @@ const readSettingsFromText = (text) => {
     }
     if (section !== 'dynamics') continue;
 
-    const assignment = line.match(/^\s*(team_names|interests|daily_run_time)\s*=\s*(.*)$/);
+    const assignment = line.match(/^\s*(team_names|interests|daily_run_time|execution_method)\s*=\s*(.*)$/);
     if (!assignment) continue;
     if (values.has(assignment[1])) throw new Error(`config.toml 的 dynamics.${assignment[1]} 重复定义。`);
     values.set(assignment[1], withoutTomlComment(assignment[2]));
@@ -125,29 +125,77 @@ const readSettingsFromText = (text) => {
   if (!values.has('team_names')) throw new Error('config.toml 缺少 dynamics.team_names。');
   if (!values.has('interests')) throw new Error('config.toml 缺少 dynamics.interests。');
   if (!values.has('daily_run_time')) throw new Error('config.toml 缺少 dynamics.daily_run_time。');
+  if (!values.has('execution_method')) throw new Error('config.toml 缺少 dynamics.execution_method。');
 
   const timeMatch = values.get('daily_run_time').match(/^(['"])(\d{2}:\d{2})\1$/);
   if (!timeMatch) throw new Error('config.toml 的 dynamics.daily_run_time 必须使用 HH:MM 字符串。');
   const [hour, minute] = timeMatch[2].split(':').map(Number);
   if (hour > 23 || minute > 59) throw new Error('config.toml 的 dynamics.daily_run_time 超出有效范围。');
+  const methodMatch = values.get('execution_method').match(/^(['"])(command|model)\1$/);
+  if (!methodMatch) throw new Error('config.toml 的 dynamics.execution_method 必须是 command 或 model。');
 
   return {
     dailyRunTime: timeMatch[2],
+    executionMethod: methodMatch[2],
     teamNames: parseTomlStringArray(values.get('team_names')),
     interests: parseTomlStringArray(values.get('interests')),
   };
 };
 
+export function readDqdSettings(configPath) {
+  return readSettingsFromText(readFileSync(configPath, 'utf8'));
+}
+
+export function migrateExecutionMethod(configPath) {
+  const currentText = readFileSync(configPath, 'utf8');
+  let inDynamicsSection = false;
+  let hasExecutionMethod = false;
+  let insertionIndex = -1;
+  const lines = currentText.split(/\r?\n/);
+
+  for (let index = 0; index < lines.length; index += 1) {
+    const sectionMatch = lines[index].match(/^\s*\[([^\]]+)\]\s*$/);
+    if (sectionMatch) {
+      inDynamicsSection = sectionMatch[1] === 'dynamics';
+      continue;
+    }
+    if (!inDynamicsSection) continue;
+    if (/^\s*execution_method\s*=/.test(lines[index])) hasExecutionMethod = true;
+    if (/^\s*daily_run_time\s*=/.test(lines[index])) insertionIndex = index + 1;
+  }
+
+  if (hasExecutionMethod) return false;
+  if (insertionIndex === -1) throw new Error('config.toml 缺少 dynamics.daily_run_time，无法迁移执行方式设置。');
+  lines.splice(insertionIndex, 0, "execution_method = 'command'");
+  const lineEnding = currentText.includes('\r\n') ? '\r\n' : '\n';
+  const temporaryPath = `${configPath}.${process.pid}.${Date.now()}.tmp`;
+  writeFileSync(temporaryPath, lines.join(lineEnding), { encoding: 'utf8', flag: 'wx' });
+  try {
+    renameSync(temporaryPath, configPath);
+  } catch (error) {
+    try {
+      unlinkSync(temporaryPath);
+    } catch {
+      // 保留原始写入错误，便于界面显示实际原因。
+    }
+    throw error;
+  }
+  return true;
+}
+
 const validateSettings = (body, availableTeamNames) => {
   if (!body || typeof body !== 'object' || Array.isArray(body)) {
     throw httpError('设置请求必须是 JSON 对象。', 400);
   }
-  const allowedKeys = new Set(['dailyRunTime', 'teamNames', 'interests']);
+  const allowedKeys = new Set(['dailyRunTime', 'executionMethod', 'teamNames', 'interests']);
   for (const key of Object.keys(body)) {
     if (!allowedKeys.has(key)) throw httpError(`不支持的设置字段: ${key}`, 400);
   }
   if (typeof body.dailyRunTime !== 'string' || !/^([01]\d|2[0-3]):[0-5]\d$/.test(body.dailyRunTime)) {
     throw httpError('自动运行时间必须是 00:00 至 23:59 之间的 HH:MM。', 400);
+  }
+  if (body.executionMethod !== 'command' && body.executionMethod !== 'model') {
+    throw httpError('执行方式必须是 command 或 model。', 400);
   }
   if (!Array.isArray(body.teamNames) || body.teamNames.length === 0) {
     throw httpError('请至少填写一个关注球队名称。', 400);
@@ -172,7 +220,7 @@ const validateSettings = (body, availableTeamNames) => {
     return interest.trim();
   });
 
-  return { dailyRunTime: body.dailyRunTime, teamNames, interests };
+  return { dailyRunTime: body.dailyRunTime, executionMethod: body.executionMethod, teamNames, interests };
 };
 
 const writeSettings = (configPath, settings) => {
@@ -181,6 +229,7 @@ const writeSettings = (configPath, settings) => {
   const replacements = new Map([
     ['team_names', JSON.stringify(settings.teamNames)],
     ['daily_run_time', `'${settings.dailyRunTime}'`],
+    ['execution_method', `'${settings.executionMethod}'`],
     ['interests', JSON.stringify(settings.interests)],
   ]);
   const counts = new Map([...replacements.keys()].map((key) => [key, 0]));
@@ -196,7 +245,7 @@ const writeSettings = (configPath, settings) => {
     }
     if (section !== 'dynamics') continue;
 
-    const assignment = line.match(/^\s*(team_names|daily_run_time|interests)\s*=/);
+    const assignment = line.match(/^\s*(team_names|daily_run_time|execution_method|interests)\s*=/);
     if (!assignment) continue;
     const key = assignment[1];
     if (counts.get(key) !== 0) throw new Error(`config.toml 的 dynamics.${key} 重复定义。`);
@@ -349,7 +398,7 @@ const runProcess = (command, args, options) => new Promise((resolve, reject) => 
   });
 });
 
-export function registerDqdSettingsApi(context, projectDir, configPath, stateDir) {
+export function registerDqdSettingsApi(context, projectDir, configPath, stateDir, scheduler, logger) {
   const pythonEnvironmentPath = join(stateDir, 'python-environment.json');
   const pythonEnvironmentDir = join(stateDir, '.venv');
   const teamData = JSON.parse(readFileSync(join(projectDir, 'teams.json'), 'utf8'));
@@ -438,18 +487,26 @@ export function registerDqdSettingsApi(context, projectDir, configPath, stateDir
             settings: readSettingsFromText(text),
             pythonEnvironment: readPythonEnvironment(),
             availableTeamNames: [...availableTeamNames],
+            scheduleState: scheduler.readState(),
+            logPath: logger.logPath,
           });
+        }
+
+        if (request.method === 'GET' && url.pathname === '/api/dqd-scroll/logs') {
+          return sendJson(response, 200, { ok: true, log: logger.readRecent(100), logPath: logger.logPath });
         }
 
         if (request.method === 'POST' && url.pathname === '/api/dqd-scroll/settings') {
           const settings = validateSettings(await readJsonBody(request), availableTeamNames);
           const savedSettings = writeSettings(configPath, settings);
-          return sendJson(response, 200, { ok: true, settings: savedSettings });
+          const scheduleState = await scheduler.sync(savedSettings);
+          return sendJson(response, 200, { ok: true, settings: savedSettings, scheduleState });
         }
 
         if (request.method === 'POST' && url.pathname === '/api/dqd-scroll/python-environment/install') {
           const pythonEnvironment = await installPythonEnvironment();
-          return sendJson(response, 200, { ok: true, pythonEnvironment });
+          const scheduleState = await scheduler.sync(readSettingsFromText(readFileSync(configPath, 'utf8')));
+          return sendJson(response, 200, { ok: true, pythonEnvironment, scheduleState });
         }
 
         return sendJson(response, 404, { ok: false, error: `未知请求: ${request.method} ${url.pathname}` });
