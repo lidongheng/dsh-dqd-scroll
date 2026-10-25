@@ -64,6 +64,7 @@ test('plugin activates against DSH services and saves settings under DSH home', 
   const teamName = initialBody.availableTeamNames[0];
   const postBody = Buffer.from(JSON.stringify({
     dailyRunTime: '21:00',
+    executionMethod: 'command',
     teamNames: [teamName],
     interests: ['伤病'],
   }));
