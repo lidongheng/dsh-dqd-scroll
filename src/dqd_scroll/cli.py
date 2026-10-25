@@ -1,7 +1,7 @@
 import argparse;
 import json;
 from calendar import monthrange;
-from datetime import date, datetime, time;
+from datetime import date, datetime, timedelta;
 from pathlib import Path;
 from zoneinfo import ZoneInfo;
 
@@ -109,7 +109,7 @@ def generate_dynamics_report(
     until: datetime | None,
     team_data_path: Path | None = None,
 ) -> int:
-    # 默认生成上海时区当天 00:00 至当前时刻的报告；传入参数可手动选择完整时间范围。
+    # 默认生成上海时区当前时刻往前 24 小时的报告；手动范围按传入值执行。
     config = load_config(config_path, team_data_path);
     if config.dynamics is None:
         raise ValueError('config.toml 缺少 dynamics 配置表。');
@@ -121,7 +121,7 @@ def generate_dynamics_report(
         raise ValueError('手动选择时间范围时，--since 和 --until 必须同时提供。');
     if since is None and until is None:
         until = datetime.now(ZoneInfo('Asia/Shanghai')).replace(tzinfo=None, microsecond=0);
-        since = datetime.combine(until.date(), time.min);
+        since = until - timedelta(hours=24);
     if since.tzinfo is not None or until.tzinfo is not None:
         raise ValueError('--since 和 --until 请使用上海本地时间，不要附带时区偏移。');
     if since >= until:

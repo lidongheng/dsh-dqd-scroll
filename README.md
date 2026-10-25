@@ -52,7 +52,7 @@ dsh plugin --profile web remove dsh-dqd-scroll
 - [x] 增加最小 `daily-report` 流程：从 SQLite 当前赛季 `team_schedules` 读取曼城赛程，筛选未来一个自然月并写入 `out/<日期>.md`；首次样例基于 2026-10-25，包含 6 场比赛。
 - [x] 根据 mitmweb 与 Postman 中成功的曼城动态请求，实现只读 GET 与 `data.next` 分页跟随；按 `show_time` / `next.after` 到达用户所选开始时间后停止，检测重复 next URL，并设置 50 页上限。
 - [x] 增加 `dynamics-report`：按 DSH 设置中的球队名称从 `teams.json` 的 `dqd_name` 找到懂球帝 ID，每支球队分别生成全部动态和兴趣命中动态报告；不写数据库或原始响应文件。
-- [x] 增加动态日报时间范围入口：可手动传 `--since` 和 `--until`，不传时生成上海时区当天 00:00 到当前时刻的日报。
+- [x] 增加动态日报时间范围入口：可手动传 `--since` 和 `--until`，不传时生成上海时区最近 24 小时的日报；设置页可选择精确到分钟的开始、结束时间并点击“现在跑一次”。
 - [x] 增加跨平台每日调度：Windows 使用任务计划程序，macOS 使用 DSH 插件内的 JavaScript 定时器；两者都支持命令运行和 headless 模型执行。
 - [x] 将调度日志写入 DSH 用户数据目录，并在设置页展示最近日志和任务状态。
 - [x] 增加无需预装 Python 的首次环境准备：在 DSH 用户数据目录下载并校验 uv，安装 Python 3.11 并初始化 SQLite。
@@ -176,7 +176,7 @@ DSH 设置页的“关注球队（每行一个懂球帝球队名称）”会写�
 
 如果运行日报时提示“请先在 config.toml 的 dynamics.interests 中配置关注内容”，说明 `interests` 还是空列表 `[]`。打开项目根目录的 `config.toml`，在 `[dynamics]` 下把它改成非空关键词列表；每个词用单引号括起来，多个词用逗号分隔。上面的“伤病”和“训练”只是填写格式示例，请换成你自己的关注词。任意一个词出现在动态标题、描述或正文中，该条动态就会进入日报。保存配置后重新运行日报命令。
 
-手动运行当前日期日报：
+手动运行最近 24 小时的日报：
 
 ```powershell
 python -m dqd_scroll dynamics-report --config config.toml
@@ -188,7 +188,9 @@ python -m dqd_scroll dynamics-report --config config.toml
 python -m dqd_scroll dynamics-report --config config.toml --since 2026-10-24T11:30:00 --until 2026-10-25T11:30:00
 ```
 
-时间按上海本地时间解释，起止时间都包含在筛选范围内。每支球队都从最新页开始采集，用动态的 `show_time` 筛选；只有 `data.next.after` 和当前整页的 `show_time` 都早于 `--since` 时才停止。每支球队最多请求 50 页；到达上限仍未到开始时间时，该队报告会标记为不完整。重复 `data.next` 会立即报错停止。动态内容只在内存处理，报告按日期和球队名称分开放入 `out/dynamics/<日期>/`；每支球队各有 `-all.md` 和 `-interests.md` 两个文件。SQLite 中没有动态表，也不会保存原始接口响应。
+自动日报在任务启动时固定结束时间，开始时间为结束时间往前 24 小时。例如 10 月 25 日 20:35 启动时，范围是 10 月 24 日 20:35 至 10 月 25 日 20:35；命令和模型方式使用同一时间范围。设置页的“自定义时间运行”可选择年月日时分，点击“现在跑一次”后按该范围以及已保存的球队、关注内容和执行方式运行；手动运行记录独立保存，不占用自动任务当天的执行标记。
+
+时间按上海本地时间解释，起止时间都包含在筛选范围内。每支球队都从最新页开始采集，用动态的 `show_time` 筛选；只有 `data.next.after` 和当前整页的 `show_time` 都早于 `--since` 时才停止。每支球队最多请求 50 页；到达上限仍未到开始时间时，该队报告会标记为不完整。重复 `data.next` 会立即报错停止。动态内容只在内存处理，报告按结束日期和球队名称分开放入 `out/dynamics/<日期>/`；同一结束日期、同一球队的报告会更新，每支球队各有 `-all.md` 和 `-interests.md` 两个文件。SQLite 中没有动态表，也不会保存原始接口响应。
 
 日志文件 `dqd-scroll.log` 和调度状态 `dynamics-schedule-state.json` 保存在 DSH 用户数据目录的 `dqd-scroll/` 下，设置页会展示最近日志。Windows 任务由任务计划程序启动，macOS 任务由 DSH 插件内定时器启动；命令方式运行 Python CLI，模型方式启动一个新的 headless DSH 会话。模型模式需要 DSH 当前模型设置可用。
 

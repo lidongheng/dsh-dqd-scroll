@@ -26,6 +26,11 @@ window.__ModuleLoader__.load({
 
     const getSettings = () => request('/settings');
     const getLogs = () => request('/logs');
+    const runNow = (range) => request('/run-now', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify(range),
+    });
     const saveSettings = (settings) => request('/settings', {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
@@ -71,6 +76,8 @@ window.__ModuleLoader__.load({
       const [message, setMessage] = React.useState('');
       const [messageTone, setMessageTone] = React.useState('');
       const [busy, setBusy] = React.useState('');
+      const [manualSince, setManualSince] = React.useState('');
+      const [manualUntil, setManualUntil] = React.useState('');
 
       React.useEffect(() => {
         let active = true;
@@ -193,6 +200,30 @@ window.__ModuleLoader__.load({
         }
       };
 
+      const onRunNow = async () => {
+        if (!manualSince || !manualUntil) {
+          showMessage('请选择自定义开始时间和结束时间。', 'error');
+          return;
+        }
+        if (manualSince >= manualUntil) {
+          showMessage('开始时间必须早于结束时间。', 'error');
+          return;
+        }
+        setBusy('run-now');
+        showMessage(`正在执行 ${manualSince} 至 ${manualUntil}（Asia/Shanghai）的日报，请保持 DSH 运行。`, '');
+        try {
+          const response = await runNow({ since: manualSince, until: manualUntil });
+          setScheduleState(response.scheduleState);
+          await refreshLogs();
+          showMessage('手动日报已完成，报告文件路径见运行日志。', 'success');
+        } catch (error) {
+          showMessage(error.message, 'error');
+          await refreshLogs();
+        } finally {
+          setBusy('');
+        }
+      };
+
       let settingsContent;
       if (settings === null) {
         const loadingText = loadingError || '正在读取项目配置…';
@@ -208,6 +239,7 @@ window.__ModuleLoader__.load({
             value: dailyRunTime,
             onChange: (event) => setDailyRunTime(event.target.value),
           }),
+          h('div', { 'data-dqd-note': '' }, '每次自动运行获取截至任务启动时刻往前 24 小时的动态。'),
           h('label', { 'data-dqd-label': '', htmlFor: 'dqd-scroll-execution-method' }, '执行方式'),
           h('select', {
             id: 'dqd-scroll-execution-method',
@@ -248,6 +280,40 @@ window.__ModuleLoader__.load({
       return h('div', { 'data-dqd-page': '' },
         h('h1', { 'data-dqd-title': '' }, '懂球帝动态日报'),
         settingsContent,
+        settings === null ? null : h('div', { 'data-dqd-section': '' },
+          h('h2', { 'data-dqd-section-title': '' }, '自定义时间运行'),
+          h('div', { 'data-dqd-note': '' }, '时间按 Asia/Shanghai（上海时间）解释，精确到分钟。使用已保存的球队、关注内容和执行方式，请先保存设置。同一结束日期、同一球队的报告会更新。'),
+          h('label', { 'data-dqd-label': '', htmlFor: 'dqd-scroll-manual-since' }, '开始时间'),
+          h('input', {
+            id: 'dqd-scroll-manual-since',
+            'data-dqd-input': '',
+            type: 'datetime-local',
+            step: 60,
+            min: '0001-01-01T00:00',
+            max: '9999-12-31T23:59',
+            value: manualSince,
+            disabled: Boolean(busy),
+            onChange: (event) => setManualSince(event.target.value),
+          }),
+          h('label', { 'data-dqd-label': '', htmlFor: 'dqd-scroll-manual-until' }, '结束时间'),
+          h('input', {
+            id: 'dqd-scroll-manual-until',
+            'data-dqd-input': '',
+            type: 'datetime-local',
+            step: 60,
+            min: '0001-01-01T00:00',
+            max: '9999-12-31T23:59',
+            value: manualUntil,
+            disabled: Boolean(busy),
+            onChange: (event) => setManualUntil(event.target.value),
+          }),
+          h('button', {
+            'data-dqd-button': '',
+            'data-primary': '',
+            disabled: Boolean(busy) || !pythonEnvironment || !pythonEnvironment.ready,
+            onClick: onRunNow,
+          }, busy === 'run-now' ? '运行中…' : '现在跑一次'),
+          scheduleState && scheduleState.last_manual_status ? h('div', { 'data-dqd-note': '' }, `上次手动运行：${scheduleState.last_manual_since} 至 ${scheduleState.last_manual_until}，状态：${scheduleState.last_manual_status}。`) : null),
         pythonEnvironment === null ? null : h('div', { 'data-dqd-section': '' },
           h('h2', { 'data-dqd-section-title': '' }, '本机运行环境'),
           h('div', { 'data-dqd-note': '' }, pythonEnvironment.ready

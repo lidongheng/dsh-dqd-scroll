@@ -24,6 +24,9 @@ test('release file allowlist contains every plugin runtime entry', () => {
     'teams.json',
     'lib/user-data.js',
     'lib/uvfetch.mjs',
+    'lib/scheduler.js',
+    'lib/dynamics-scheduled-runner.js',
+    'lib/dynamics-report-time.mjs',
     'src/dqd_scroll/__main__.py',
     'src/dqd_scroll/cli.py',
     'src/dqd_scroll/api/dqd_api.py',
@@ -34,7 +37,12 @@ test('release file allowlist contains every plugin runtime entry', () => {
   assert.ok(packageJson.files.includes('src/dqd_scroll/*.py'), 'Python package files are missing from the package allowlist');
   assert.ok(packageJson.files.includes('src/dqd_scroll/api/*.py'), 'Python API files are missing from the package allowlist');
   assert.ok(packageJson.files.includes('src/dqd_scroll/lib/*.py'), 'Python library files are missing from the package allowlist');
-  for (const file of runtimeFiles.slice(0, 8)) {
+  for (const file of runtimeFiles.filter((file) => !file.startsWith('src/'))) {
     assert.ok(packageJson.files.includes(file), `${file} is missing from the package allowlist`);
   }
+});
+
+test('npm and Python package versions match', () => {
+  const metadata = readFileSync(join(projectDir, 'pyproject.toml'), 'utf8');
+  assert.equal(metadata.match(/^version = "([^"]+)"/m)[1], packageJson.version);
 });

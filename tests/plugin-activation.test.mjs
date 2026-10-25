@@ -4,6 +4,10 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import test from 'node:test';
 import { apply } from '../index.js';
+import childProcess from 'node:child_process';
+import { EventEmitter } from 'node:events';
+import { PassThrough } from 'node:stream';
+import { syncBuiltinESMExports } from 'node:module';
 
 const responseObject = () => ({
   headers: {},
@@ -18,6 +22,19 @@ const responseObject = () => ({
 });
 
 test('plugin activates against DSH services and saves settings under DSH home', async (context) => {
+  // 激活测试只检查设置服务，禁止触碰本机真实的 Windows 计划任务。
+  context.mock.method(childProcess, 'spawn', () => {
+    const child = new EventEmitter();
+    child.stdout = new PassThrough();
+    child.stderr = new PassThrough();
+    queueMicrotask(() => child.emit('close', 0));
+    return child;
+  });
+  syncBuiltinESMExports();
+  context.after(() => {
+    context.mock.restoreAll();
+    syncBuiltinESMExports();
+  });
   const dshHome = mkdtempSync(join(tmpdir(), 'dqd-scroll-activation-'));
   const cleanups = [];
   const routes = [];

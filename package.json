@@ -1,6 +1,6 @@
 {
   "name": "dsh-dqd-scroll",
-  "version": "0.2.2",
+  "version": "0.3.0",
   "description": "DeepSeek Harness 懂球帝阅读插件。",
   "keywords": [
     "dsh",
@@ -42,6 +42,7 @@
     "settings-api.js",
     "lib/logger.js",
     "lib/scheduler.js",
+    "lib/dynamics-report-time.mjs",
     "lib/dynamics-scheduled-runner.js",
     "lib/uvfetch.mjs",
     "lib/user-data.js",

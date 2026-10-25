@@ -2,6 +2,7 @@ import { spawn } from 'node:child_process';
 import { existsSync, mkdirSync, readFileSync, renameSync, unlinkSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { ensureUv } from './lib/uvfetch.mjs';
+import { validateManualRange } from './lib/dynamics-report-time.mjs';
 
 const MAX_REQUEST_BYTES = 16_384;
 const MAX_TOOL_OUTPUT_CHARS = 32_768;
@@ -505,6 +506,18 @@ export function registerDqdSettingsApi(context, projectDir, configPath, stateDir
           const savedSettings = writeSettings(configPath, settings);
           const scheduleState = await scheduler.sync(savedSettings);
           return sendJson(response, 200, { ok: true, settings: savedSettings, scheduleState });
+        }
+
+        if (request.method === 'POST' && url.pathname === '/api/dqd-scroll/run-now') {
+          const body = await readJsonBody(request);
+          let range;
+          try {
+            range = validateManualRange(body);
+          } catch (error) {
+            throw httpError(error.message, 400);
+          }
+          const scheduleState = await scheduler.runNow(readDqdSettings(configPath), range);
+          return sendJson(response, 200, { ok: true, scheduleState });
         }
 
         if (request.method === 'POST' && url.pathname === '/api/dqd-scroll/python-environment/install') {
