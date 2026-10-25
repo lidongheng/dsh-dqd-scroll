@@ -178,5 +178,833 @@
     "league_serial": 36,
     "league_slug": "epl",
     "match_league_name": "英超"
+  },
+  {
+    "dqd_id": 50001043,
+    "dqd_name": "拉齐奥",
+    "qiutan_name": "拉齐奥",
+    "qiutan_serial": "182",
+    "league_serial": 34,
+    "league_slug": "serieA",
+    "match_league_name": "意甲"
+  },
+  {
+    "dqd_id": 50001042,
+    "dqd_name": "国际米兰",
+    "qiutan_name": "国际米兰",
+    "qiutan_serial": "152",
+    "league_serial": 34,
+    "league_slug": "serieA",
+    "match_league_name": "意甲"
+  },
+  {
+    "dqd_id": 50001039,
+    "dqd_name": "罗马",
+    "qiutan_name": "罗马",
+    "qiutan_serial": "174",
+    "league_serial": 34,
+    "league_slug": "serieA",
+    "match_league_name": "意甲"
+  },
+  {
+    "dqd_id": 50001081,
+    "dqd_name": "科莫",
+    "qiutan_name": "科莫",
+    "qiutan_serial": "1397",
+    "league_serial": 34,
+    "league_slug": "serieA",
+    "match_league_name": "意甲"
+  },
+  {
+    "dqd_id": 50001038,
+    "dqd_name": "AC米兰",
+    "qiutan_name": "AC米兰",
+    "qiutan_serial": "150",
+    "league_serial": 34,
+    "league_slug": "serieA",
+    "match_league_name": "意甲"
+  },
+  {
+    "dqd_id": 50002542,
+    "dqd_name": "弗罗西诺内",
+    "qiutan_name": "弗洛西诺尼",
+    "qiutan_serial": "1359",
+    "league_serial": 34,
+    "league_slug": "serieA",
+    "match_league_name": "意甲"
+  },
+  {
+    "dqd_id": 50001066,
+    "dqd_name": "都灵",
+    "qiutan_name": "都灵",
+    "qiutan_serial": "558",
+    "league_serial": 34,
+    "league_slug": "serieA",
+    "match_league_name": "意甲"
+  },
+  {
+    "dqd_id": 50001054,
+    "dqd_name": "卡利亚里",
+    "qiutan_name": "卡利亚里",
+    "qiutan_serial": "183",
+    "league_serial": 34,
+    "league_slug": "serieA",
+    "match_league_name": "意甲"
+  },
+  {
+    "dqd_id": 50001068,
+    "dqd_name": "那不勒斯",
+    "qiutan_name": "那不勒斯",
+    "qiutan_serial": "1419",
+    "league_serial": 34,
+    "league_slug": "serieA",
+    "match_league_name": "意甲"
+  },
+  {
+    "dqd_id": 50001040,
+    "dqd_name": "尤文图斯",
+    "qiutan_name": "尤文图斯",
+    "qiutan_serial": "166",
+    "league_serial": 34,
+    "league_slug": "serieA",
+    "match_league_name": "意甲"
+  },
+  {
+    "dqd_id": 50001053,
+    "dqd_name": "亚特兰大",
+    "qiutan_name": "亚特兰大",
+    "qiutan_serial": "154",
+    "league_serial": 34,
+    "league_slug": "serieA",
+    "match_league_name": "意甲"
+  },
+  {
+    "dqd_id": 50001049,
+    "dqd_name": "莱切",
+    "qiutan_name": "莱切",
+    "qiutan_serial": "158",
+    "league_serial": 34,
+    "league_slug": "serieA",
+    "match_league_name": "意甲"
+  },
+  {
+    "dqd_id": 50001047,
+    "dqd_name": "博洛尼亚",
+    "qiutan_name": "博洛尼亚",
+    "qiutan_serial": "185",
+    "league_serial": 34,
+    "league_slug": "serieA",
+    "match_league_name": "意甲"
+  },
+  {
+    "dqd_id": 50004293,
+    "dqd_name": "萨索洛",
+    "qiutan_name": "萨索洛",
+    "qiutan_serial": "2960",
+    "league_serial": 34,
+    "league_slug": "serieA",
+    "match_league_name": "意甲"
+  },
+  {
+    "dqd_id": 50002077,
+    "dqd_name": "蒙扎",
+    "qiutan_name": "蒙扎",
+    "qiutan_serial": "2667",
+    "league_serial": 34,
+    "league_slug": "serieA",
+    "match_league_name": "意甲"
+  },
+  {
+    "dqd_id": 50001044,
+    "dqd_name": "乌迪内斯",
+    "qiutan_name": "乌迪内斯",
+    "qiutan_serial": "187",
+    "league_serial": 34,
+    "league_slug": "serieA",
+    "match_league_name": "意甲"
+  },
+  {
+    "dqd_id": 50001074,
+    "dqd_name": "热那亚",
+    "qiutan_name": "热那亚",
+    "qiutan_serial": "552",
+    "league_serial": 34,
+    "league_slug": "serieA",
+    "match_league_name": "意甲"
+  },
+  {
+    "dqd_id": 50001057,
+    "dqd_name": "佛罗伦萨",
+    "qiutan_name": "佛罗伦萨",
+    "qiutan_serial": "176",
+    "league_serial": 34,
+    "league_slug": "serieA",
+    "match_league_name": "意甲"
+  },
+  {
+    "dqd_id": 50001041,
+    "dqd_name": "帕尔马",
+    "qiutan_name": "帕尔马",
+    "qiutan_serial": "189",
+    "league_serial": 34,
+    "league_slug": "serieA",
+    "match_league_name": "意甲"
+  },
+  {
+    "dqd_id": 50001072,
+    "dqd_name": "威尼斯",
+    "qiutan_name": "威尼斯",
+    "qiutan_serial": "557",
+    "league_serial": 34,
+    "league_slug": "serieA",
+    "match_league_name": "意甲"
+  },
+  {
+    "dqd_id": 50001756,
+    "dqd_name": "巴塞罗那",
+    "qiutan_name": "巴塞罗那",
+    "qiutan_serial": "84",
+    "league_serial": 31,
+    "league_slug": "laLiga",
+    "match_league_name": "西甲"
+  },
+  {
+    "dqd_id": 50001759,
+    "dqd_name": "马德里竞技",
+    "qiutan_name": "马德里竞技",
+    "qiutan_serial": "109",
+    "league_serial": 31,
+    "league_slug": "laLiga",
+    "match_league_name": "西甲"
+  },
+  {
+    "dqd_id": 50001755,
+    "dqd_name": "皇家马德里",
+    "qiutan_name": "皇家马德里",
+    "qiutan_serial": "82",
+    "league_serial": 31,
+    "league_slug": "laLiga",
+    "match_league_name": "西甲"
+  },
+  {
+    "dqd_id": 50001764,
+    "dqd_name": "皇家贝蒂斯",
+    "qiutan_name": "皇家贝蒂斯",
+    "qiutan_serial": "96",
+    "league_serial": 31,
+    "league_slug": "laLiga",
+    "match_league_name": "西甲"
+  },
+  {
+    "dqd_id": 50001767,
+    "dqd_name": "皇家社会",
+    "qiutan_name": "皇家社会",
+    "qiutan_serial": "106",
+    "league_serial": 31,
+    "league_slug": "laLiga",
+    "match_league_name": "西甲"
+  },
+  {
+    "dqd_id": 50001760,
+    "dqd_name": "塞维利亚",
+    "qiutan_name": "塞维利亚",
+    "qiutan_serial": "86",
+    "league_serial": 31,
+    "league_slug": "laLiga",
+    "match_league_name": "西甲"
+  },
+  {
+    "dqd_id": 50001776,
+    "dqd_name": "阿拉维斯",
+    "qiutan_name": "阿拉维斯",
+    "qiutan_serial": "137",
+    "league_serial": 31,
+    "league_slug": "laLiga",
+    "match_league_name": "西甲"
+  },
+  {
+    "dqd_id": 50001762,
+    "dqd_name": "比利亚雷亚尔",
+    "qiutan_name": "比利亚雷亚尔",
+    "qiutan_serial": "107",
+    "league_serial": 31,
+    "league_slug": "laLiga",
+    "match_league_name": "西甲"
+  },
+  {
+    "dqd_id": 50001772,
+    "dqd_name": "塞尔塔",
+    "qiutan_name": "塞尔塔",
+    "qiutan_serial": "114",
+    "league_serial": 31,
+    "league_slug": "laLiga",
+    "match_league_name": "西甲"
+  },
+  {
+    "dqd_id": 50001757,
+    "dqd_name": "拉科鲁尼亚",
+    "qiutan_name": "拉科鲁尼亚",
+    "qiutan_serial": "93",
+    "league_serial": 31,
+    "league_slug": "laLiga",
+    "match_league_name": "西甲"
+  },
+  {
+    "dqd_id": 50001761,
+    "dqd_name": "奥萨苏纳",
+    "qiutan_name": "奥萨苏纳",
+    "qiutan_serial": "94",
+    "league_serial": 31,
+    "league_slug": "laLiga",
+    "match_league_name": "西甲"
+  },
+  {
+    "dqd_id": 50001768,
+    "dqd_name": "桑坦德竞技",
+    "qiutan_name": "桑坦德竞技",
+    "qiutan_serial": "104",
+    "league_serial": 31,
+    "league_slug": "laLiga",
+    "match_league_name": "西甲"
+  },
+  {
+    "dqd_id": 50001775,
+    "dqd_name": "莱万特",
+    "qiutan_name": "莱万特",
+    "qiutan_serial": "103",
+    "league_serial": 31,
+    "league_slug": "laLiga",
+    "match_league_name": "西甲"
+  },
+  {
+    "dqd_id": 50001782,
+    "dqd_name": "埃尔切",
+    "qiutan_name": "埃尔切",
+    "qiutan_serial": "126",
+    "league_serial": 31,
+    "league_slug": "laLiga",
+    "match_league_name": "西甲"
+  },
+  {
+    "dqd_id": 50001758,
+    "dqd_name": "毕尔巴鄂竞技",
+    "qiutan_name": "毕尔巴鄂竞技",
+    "qiutan_serial": "92",
+    "league_serial": 31,
+    "league_slug": "laLiga",
+    "match_league_name": "西甲"
+  },
+  {
+    "dqd_id": 50001778,
+    "dqd_name": "赫塔费",
+    "qiutan_name": "赫塔菲",
+    "qiutan_serial": "98",
+    "league_serial": 31,
+    "league_slug": "laLiga",
+    "match_league_name": "西甲"
+  },
+  {
+    "dqd_id": 50001793,
+    "dqd_name": "巴列卡诺",
+    "qiutan_name": "巴列卡诺",
+    "qiutan_serial": "994",
+    "league_serial": 31,
+    "league_slug": "laLiga",
+    "match_league_name": "西甲"
+  },
+  {
+    "dqd_id": 50001771,
+    "dqd_name": "西班牙人",
+    "qiutan_name": "西班牙人",
+    "qiutan_serial": "100",
+    "league_serial": 31,
+    "league_slug": "laLiga",
+    "match_league_name": "西甲"
+  },
+  {
+    "dqd_id": 50001754,
+    "dqd_name": "瓦伦西亚",
+    "qiutan_name": "巴伦西亚",
+    "qiutan_serial": "91",
+    "league_serial": 31,
+    "league_slug": "laLiga",
+    "match_league_name": "西甲"
+  },
+  {
+    "dqd_id": 50001763,
+    "dqd_name": "马拉加",
+    "qiutan_name": "马拉加",
+    "qiutan_serial": "102",
+    "league_serial": 31,
+    "league_slug": "laLiga",
+    "match_league_name": "西甲"
+  },
+  {
+    "dqd_id": 50000807,
+    "dqd_name": "多特蒙德",
+    "qiutan_name": "多特蒙德",
+    "qiutan_serial": "99",
+    "league_serial": 8,
+    "league_slug": "bundesliga",
+    "match_league_name": "德甲"
+  },
+  {
+    "dqd_id": 50000804,
+    "dqd_name": "拜仁慕尼黑",
+    "qiutan_name": "拜仁慕尼黑",
+    "qiutan_serial": "88",
+    "league_serial": 8,
+    "league_slug": "bundesliga",
+    "match_league_name": "德甲"
+  },
+  {
+    "dqd_id": 50000813,
+    "dqd_name": "弗赖堡",
+    "qiutan_name": "弗赖堡",
+    "qiutan_serial": "172",
+    "league_serial": 8,
+    "league_slug": "bundesliga",
+    "match_league_name": "德甲"
+  },
+  {
+    "dqd_id": 50000806,
+    "dqd_name": "勒沃库森",
+    "qiutan_name": "勒沃库森",
+    "qiutan_serial": "165",
+    "league_serial": 8,
+    "league_slug": "bundesliga",
+    "match_league_name": "德甲"
+  },
+  {
+    "dqd_id": 50008568,
+    "dqd_name": "RB莱比锡",
+    "qiutan_name": "RB莱比锡",
+    "qiutan_serial": "13201",
+    "league_serial": 8,
+    "league_slug": "bundesliga",
+    "match_league_name": "德甲"
+  },
+  {
+    "dqd_id": 50000803,
+    "dqd_name": "云达不莱梅",
+    "qiutan_name": "云达不莱梅",
+    "qiutan_serial": "132",
+    "league_serial": 8,
+    "league_slug": "bundesliga",
+    "match_league_name": "德甲"
+  },
+  {
+    "dqd_id": 50000820,
+    "dqd_name": "美因茨",
+    "qiutan_name": "美因茨",
+    "qiutan_serial": "162",
+    "league_serial": 8,
+    "league_slug": "bundesliga",
+    "match_league_name": "德甲"
+  },
+  {
+    "dqd_id": 50000848,
+    "dqd_name": "埃尔沃斯贝格",
+    "qiutan_name": "埃弗斯堡",
+    "qiutan_serial": "1076",
+    "league_serial": 8,
+    "league_slug": "bundesliga",
+    "match_league_name": "德甲"
+  },
+  {
+    "dqd_id": 50000841,
+    "dqd_name": "奥格斯堡",
+    "qiutan_name": "奥格斯堡",
+    "qiutan_serial": "1135",
+    "league_serial": 8,
+    "league_slug": "bundesliga",
+    "match_league_name": "德甲"
+  },
+  {
+    "dqd_id": 50000810,
+    "dqd_name": "汉堡",
+    "qiutan_name": "汉堡",
+    "qiutan_serial": "160",
+    "league_serial": 8,
+    "league_slug": "bundesliga",
+    "match_league_name": "德甲"
+  },
+  {
+    "dqd_id": 50000823,
+    "dqd_name": "科隆",
+    "qiutan_name": "科隆",
+    "qiutan_serial": "490",
+    "league_serial": 8,
+    "league_slug": "bundesliga",
+    "match_league_name": "德甲"
+  },
+  {
+    "dqd_id": 50000851,
+    "dqd_name": "帕德博恩",
+    "qiutan_name": "帕德博恩",
+    "qiutan_serial": "1720",
+    "league_serial": 8,
+    "league_slug": "bundesliga",
+    "match_league_name": "德甲"
+  },
+  {
+    "dqd_id": 50000822,
+    "dqd_name": "法兰克福",
+    "qiutan_name": "法兰克福",
+    "qiutan_serial": "423",
+    "league_serial": 8,
+    "league_slug": "bundesliga",
+    "match_league_name": "德甲"
+  },
+  {
+    "dqd_id": 50000842,
+    "dqd_name": "霍芬海姆",
+    "qiutan_name": "霍芬海姆",
+    "qiutan_serial": "1078",
+    "league_serial": 8,
+    "league_slug": "bundesliga",
+    "match_league_name": "德甲"
+  },
+  {
+    "dqd_id": 50000809,
+    "dqd_name": "沙尔克04",
+    "qiutan_name": "沙尔克04",
+    "qiutan_serial": "151",
+    "league_serial": 8,
+    "league_slug": "bundesliga",
+    "match_league_name": "德甲"
+  },
+  {
+    "dqd_id": 50000805,
+    "dqd_name": "斯图加特",
+    "qiutan_name": "斯图加特",
+    "qiutan_serial": "155",
+    "league_serial": 8,
+    "league_slug": "bundesliga",
+    "match_league_name": "德甲"
+  },
+  {
+    "dqd_id": 50000860,
+    "dqd_name": "柏林联合",
+    "qiutan_name": "柏林联合",
+    "qiutan_serial": "1087",
+    "league_serial": 8,
+    "league_slug": "bundesliga",
+    "match_league_name": "德甲"
+  },
+  {
+    "dqd_id": 50000814,
+    "dqd_name": "门兴格拉德巴赫",
+    "qiutan_name": "门兴格拉德巴赫",
+    "qiutan_serial": "128",
+    "league_serial": 8,
+    "league_slug": "bundesliga",
+    "match_league_name": "德甲"
+  },
+  {
+    "dqd_id": 50000729,
+    "dqd_name": "里昂",
+    "qiutan_name": "里昂",
+    "qiutan_serial": "205",
+    "league_serial": 11,
+    "league_slug": "ligue1",
+    "match_league_name": "法甲"
+  },
+  {
+    "dqd_id": 50000731,
+    "dqd_name": "巴黎圣日耳曼",
+    "qiutan_name": "巴黎圣日耳曼",
+    "qiutan_serial": "271",
+    "league_serial": 11,
+    "league_slug": "ligue1",
+    "match_league_name": "法甲"
+  },
+  {
+    "dqd_id": 50000740,
+    "dqd_name": "里尔",
+    "qiutan_name": "里尔",
+    "qiutan_serial": "266",
+    "league_serial": 11,
+    "league_slug": "ligue1",
+    "match_league_name": "法甲"
+  },
+  {
+    "dqd_id": 50002258,
+    "dqd_name": "巴黎FC",
+    "qiutan_name": "巴黎FC",
+    "qiutan_serial": "1796",
+    "league_serial": 11,
+    "league_slug": "ligue1",
+    "match_league_name": "法甲"
+  },
+  {
+    "dqd_id": 50000730,
+    "dqd_name": "摩纳哥",
+    "qiutan_name": "摩纳哥",
+    "qiutan_serial": "197",
+    "league_serial": 11,
+    "league_slug": "ligue1",
+    "match_league_name": "法甲"
+  },
+  {
+    "dqd_id": 50000737,
+    "dqd_name": "朗斯",
+    "qiutan_name": "朗斯",
+    "qiutan_serial": "202",
+    "league_serial": 11,
+    "league_slug": "ligue1",
+    "match_league_name": "法甲"
+  },
+  {
+    "dqd_id": 50000738,
+    "dqd_name": "雷恩",
+    "qiutan_name": "雷恩",
+    "qiutan_serial": "251",
+    "league_serial": 11,
+    "league_slug": "ligue1",
+    "match_league_name": "法甲"
+  },
+  {
+    "dqd_id": 50000752,
+    "dqd_name": "洛里昂",
+    "qiutan_name": "洛里昂",
+    "qiutan_serial": "333",
+    "league_serial": 11,
+    "league_slug": "ligue1",
+    "match_league_name": "法甲"
+  },
+  {
+    "dqd_id": 50000739,
+    "dqd_name": "尼斯",
+    "qiutan_name": "尼斯",
+    "qiutan_serial": "259",
+    "league_serial": 11,
+    "league_slug": "ligue1",
+    "match_league_name": "法甲"
+  },
+  {
+    "dqd_id": 50000735,
+    "dqd_name": "马赛",
+    "qiutan_name": "马赛",
+    "qiutan_serial": "211",
+    "league_serial": 11,
+    "league_slug": "ligue1",
+    "match_league_name": "法甲"
+  },
+  {
+    "dqd_id": 50000767,
+    "dqd_name": "布雷斯特",
+    "qiutan_name": "布雷斯特",
+    "qiutan_serial": "306",
+    "league_serial": 11,
+    "league_slug": "ligue1",
+    "match_league_name": "法甲"
+  },
+  {
+    "dqd_id": 50000744,
+    "dqd_name": "图卢兹",
+    "qiutan_name": "图卢兹",
+    "qiutan_serial": "216",
+    "league_serial": 11,
+    "league_slug": "ligue1",
+    "match_league_name": "法甲"
+  },
+  {
+    "dqd_id": 50000733,
+    "dqd_name": "欧塞尔",
+    "qiutan_name": "欧塞尔",
+    "qiutan_serial": "215",
+    "league_serial": 11,
+    "league_slug": "ligue1",
+    "match_league_name": "法甲"
+  },
+  {
+    "dqd_id": 50000743,
+    "dqd_name": "斯特拉斯堡",
+    "qiutan_name": "斯特拉斯堡",
+    "qiutan_serial": "260",
+    "league_serial": 11,
+    "league_slug": "ligue1",
+    "match_league_name": "法甲"
+  },
+  {
+    "dqd_id": 50000763,
+    "dqd_name": "昂热",
+    "qiutan_name": "昂热",
+    "qiutan_serial": "304",
+    "league_serial": 11,
+    "league_slug": "ligue1",
+    "match_league_name": "法甲"
+  },
+  {
+    "dqd_id": 50000750,
+    "dqd_name": "勒芒",
+    "qiutan_name": "勒芒",
+    "qiutan_serial": "328",
+    "league_serial": 11,
+    "league_slug": "ligue1",
+    "match_league_name": "法甲"
+  },
+  {
+    "dqd_id": 50000759,
+    "dqd_name": "特鲁瓦",
+    "qiutan_name": "特鲁瓦",
+    "qiutan_serial": "366",
+    "league_serial": 11,
+    "league_slug": "ligue1",
+    "match_league_name": "法甲"
+  },
+  {
+    "dqd_id": 50000757,
+    "dqd_name": "勒阿弗尔",
+    "qiutan_name": "勒阿弗尔",
+    "qiutan_serial": "335",
+    "league_serial": 11,
+    "league_slug": "ligue1",
+    "match_league_name": "法甲"
+  },
+  {
+    "dqd_id": 500076899,
+    "dqd_name": "成都蓉城",
+    "qiutan_name": "成都蓉城",
+    "qiutan_serial": "40347",
+    "league_serial": 60,
+    "league_slug": "ChinaSuperLeague",
+    "match_league_name": "中超"
+  },
+  {
+    "dqd_id": 5000122423,
+    "dqd_name": "大连英博",
+    "qiutan_name": "大连英博",
+    "qiutan_serial": "22873",
+    "league_serial": 60,
+    "league_slug": "ChinaSuperLeague",
+    "match_league_name": "中超"
+  },
+  {
+    "dqd_id": 50000330,
+    "dqd_name": "北京国安",
+    "qiutan_name": "北京国安",
+    "qiutan_serial": "43",
+    "league_serial": 60,
+    "league_slug": "ChinaSuperLeague",
+    "match_league_name": "中超"
+  },
+  {
+    "dqd_id": 50000335,
+    "dqd_name": "山东泰山",
+    "qiutan_name": "山东泰山",
+    "qiutan_serial": "40",
+    "league_serial": 60,
+    "league_slug": "ChinaSuperLeague",
+    "match_league_name": "中超"
+  },
+  {
+    "dqd_id": 50007190,
+    "dqd_name": "上海海港",
+    "qiutan_name": "上海海港",
+    "qiutan_serial": "7642",
+    "league_serial": 60,
+    "league_slug": "ChinaSuperLeague",
+    "match_league_name": "中超"
+  },
+  {
+    "dqd_id": 5000117905,
+    "dqd_name": "云南玉昆",
+    "qiutan_name": "云南玉昆",
+    "qiutan_serial": "65961",
+    "league_serial": 60,
+    "league_slug": "ChinaSuperLeague",
+    "match_league_name": "中超"
+  },
+  {
+    "dqd_id": 500093933,
+    "dqd_name": "青岛西海岸",
+    "qiutan_name": "青岛西海岸",
+    "qiutan_serial": "45272",
+    "league_serial": 60,
+    "league_slug": "ChinaSuperLeague",
+    "match_league_name": "中超"
+  },
+  {
+    "dqd_id": 50000334,
+    "dqd_name": "上海申花",
+    "qiutan_name": "上海申花",
+    "qiutan_serial": "39",
+    "league_serial": 60,
+    "league_slug": "ChinaSuperLeague",
+    "match_league_name": "中超"
+  },
+  {
+    "dqd_id": 5000122484,
+    "dqd_name": "重庆铜梁龙",
+    "qiutan_name": "重庆铜梁龙",
+    "qiutan_serial": "65972",
+    "league_serial": 60,
+    "league_slug": "ChinaSuperLeague",
+    "match_league_name": "中超"
+  },
+  {
+    "dqd_id": 50000341,
+    "dqd_name": "浙江",
+    "qiutan_name": "浙江俱乐部绿城",
+    "qiutan_serial": "542",
+    "league_serial": 60,
+    "league_slug": "ChinaSuperLeague",
+    "match_league_name": "中超"
+  },
+  {
+    "dqd_id": 500053965,
+    "dqd_name": "深圳新鹏城",
+    "qiutan_name": "深圳新鹏城",
+    "qiutan_serial": "37340",
+    "league_serial": 60,
+    "league_slug": "ChinaSuperLeague",
+    "match_league_name": "中超"
+  },
+  {
+    "dqd_id": 50000332,
+    "dqd_name": "天津津门虎",
+    "qiutan_name": "天津津门虎",
+    "qiutan_serial": "89",
+    "league_serial": 60,
+    "league_slug": "ChinaSuperLeague",
+    "match_league_name": "中超"
+  },
+  {
+    "dqd_id": 500016400,
+    "dqd_name": "辽宁铁人",
+    "qiutan_name": "辽宁铁人",
+    "qiutan_serial": "26511",
+    "league_serial": 60,
+    "league_slug": "ChinaSuperLeague",
+    "match_league_name": "中超"
+  },
+  {
+    "dqd_id": 50000339,
+    "dqd_name": "河南",
+    "qiutan_name": "河南队",
+    "qiutan_serial": "541",
+    "league_serial": 60,
+    "league_slug": "ChinaSuperLeague",
+    "match_league_name": "中超"
+  },
+  {
+    "dqd_id": 500077677,
+    "dqd_name": "武汉三镇",
+    "qiutan_name": "武汉三镇",
+    "qiutan_serial": "42492",
+    "league_serial": 60,
+    "league_slug": "ChinaSuperLeague",
+    "match_league_name": "中超"
+  },
+  {
+    "dqd_id": 50000328,
+    "dqd_name": "青岛海牛",
+    "qiutan_name": "青岛海牛",
+    "qiutan_serial": "44",
+    "league_serial": 60,
+    "league_slug": "ChinaSuperLeague",
+    "match_league_name": "中超"
   }
 ]

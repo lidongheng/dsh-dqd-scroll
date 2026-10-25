@@ -1,6 +1,7 @@
-import { spawn, spawnSync } from 'node:child_process';
+import { spawn } from 'node:child_process';
 import { existsSync, mkdirSync, readFileSync, renameSync, unlinkSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
+import { ensureUv } from './lib/uvfetch.mjs';
 
 const MAX_REQUEST_BYTES = 16_384;
 const MAX_TOOL_OUTPUT_CHARS = 32_768;
@@ -137,7 +138,7 @@ const readSettingsFromText = (text) => {
   };
 };
 
-const validateSettings = (body) => {
+const validateSettings = (body, availableTeamNames) => {
   if (!body || typeof body !== 'object' || Array.isArray(body)) {
     throw httpError('设置请求必须是 JSON 对象。', 400);
   }
@@ -155,7 +156,11 @@ const validateSettings = (body) => {
     if (typeof teamName !== 'string' || teamName.trim().length === 0) {
       throw httpError(`第 ${index + 1} 个关注球队名称不能为空。`, 400);
     }
-    return teamName.trim();
+    const normalizedTeamName = teamName.trim();
+    if (!availableTeamNames.has(normalizedTeamName)) {
+      throw httpError(`不支持关注球队“${normalizedTeamName}”；请从设置页显示的可选球队中选择。`, 400);
+    }
+    return normalizedTeamName;
   });
   if (new Set(teamNames).size !== teamNames.length) throw httpError('关注球队名称不能重复。', 400);
   if (!Array.isArray(body.interests)) throw httpError('关注内容必须是字符串数组。', 400);
@@ -305,11 +310,51 @@ const appendBounded = (current, chunk) => {
   return combined.slice(Math.max(0, combined.length - MAX_TOOL_OUTPUT_CHARS));
 };
 
+const runProcess = (command, args, options) => new Promise((resolve, reject) => {
+  let child;
+  try {
+    child = spawn(command, args, {
+      ...options,
+      windowsHide: true,
+      stdio: ['ignore', 'pipe', 'pipe'],
+    });
+  } catch (error) {
+    reject(error);
+    return;
+  }
+
+  let stdout = '';
+  let stderr = '';
+  let settled = false;
+  child.stdout.on('data', (chunk) => {
+    stdout = appendBounded(stdout, chunk);
+  });
+  child.stderr.on('data', (chunk) => {
+    stderr = appendBounded(stderr, chunk);
+  });
+  child.once('error', (error) => {
+    if (settled) return;
+    settled = true;
+    reject(error);
+  });
+  child.once('close', (code, signal) => {
+    if (settled) return;
+    settled = true;
+    const output = [stdout, stderr].filter(Boolean).join('\n');
+    if (code !== 0) {
+      reject(new Error(`${command} ${args.join(' ')} 失败: ${output || `exit=${code} signal=${signal ?? 'none'}`}`));
+      return;
+    }
+    resolve({ code, output, stdout, stderr });
+  });
+});
+
 export function registerDqdSettingsApi(context, projectDir, configPath, stateDir) {
-  const scriptPath = join(projectDir, 'tools', 'refresh-dqd-mitm-ca.ps1');
   const pythonEnvironmentPath = join(stateDir, 'python-environment.json');
   const pythonEnvironmentDir = join(stateDir, '.venv');
-  let activeMaintenanceProcess = null;
+  const teamData = JSON.parse(readFileSync(join(projectDir, 'teams.json'), 'utf8'));
+  const availableTeamNames = new Set(teamData.map((team) => team.dqd_name));
+  let pythonEnvironmentInstallRunning = false;
 
   const pythonEnvironmentPython = () => process.platform === 'win32'
     ? join(pythonEnvironmentDir, 'Scripts', 'python.exe')
@@ -328,132 +373,55 @@ export function registerDqdSettingsApi(context, projectDir, configPath, stateDir
     };
   };
 
-  const installPythonEnvironment = () => {
-    // 每台机器从本机 Python 创建同一项目专用的 venv，DB 初始化也在此环境执行。
-    const versionResult = spawnSync('python', [
-      '-c',
-      'import sys; print(f"{sys.version_info.major}.{sys.version_info.minor}")',
-    ], {
-      cwd: projectDir,
-      encoding: 'utf8',
-      windowsHide: true,
-    });
-    if (versionResult.error) {
-      throw httpError(
-        '本机找不到 python 命令。请安装 Python 3.11 或更高版本，并让当前 DSH 进程可以通过 python 命令启动它。',
-        400,
-      );
-    }
-    if (versionResult.status !== 0) {
-      throw new Error(`读取本机 Python 版本失败: ${versionResult.stderr || versionResult.stdout}`);
-    }
-    const versionMatch = /^(\d+)\.(\d+)$/.exec(versionResult.stdout.trim());
-    if (!versionMatch) throw new Error(`无法识别本机 Python 版本: ${versionResult.stdout.trim()}`);
-    const pythonVersion = `${versionMatch[1]}.${versionMatch[2]}`;
-    if (Number(versionMatch[1]) < 3 || (Number(versionMatch[1]) === 3 && Number(versionMatch[2]) < 11)) {
-      throw httpError(`本项目需要 Python 3.11 或更高版本，当前检测到 ${pythonVersion}。`, 400);
-    }
-
-    mkdirSync(stateDir, { recursive: true });
-    const environmentResult = spawnSync('python', ['-m', 'venv', pythonEnvironmentDir], {
-      cwd: projectDir,
-      encoding: 'utf8',
-      windowsHide: true,
-    });
-    if (environmentResult.error) throw environmentResult.error;
-    if (environmentResult.status !== 0) {
-      const output = [environmentResult.stdout, environmentResult.stderr].filter(Boolean).join('\n');
-      throw new Error(`创建本机 Python 环境失败: ${output || `exit=${environmentResult.status}`}`);
-    }
-
-    const pythonPath = pythonEnvironmentPython();
-    if (!existsSync(pythonPath)) throw new Error(`Python 环境创建后未找到解释器: ${pythonPath}`);
-    const databaseResult = spawnSync(pythonPath, [
-      '-m',
-      'dqd_scroll',
-      'db-init',
-      '--config',
-      configPath,
-    ], {
-      cwd: projectDir,
-      encoding: 'utf8',
-      env: {
+  const installPythonEnvironment = async () => {
+    if (pythonEnvironmentInstallRunning) throw httpError('本机运行环境正在安装。', 409);
+    pythonEnvironmentInstallRunning = true;
+    try {
+      mkdirSync(stateDir, { recursive: true });
+      const uvPath = await ensureUv({ dir: join(stateDir, 'bin') });
+      const pythonEnv = {
         ...process.env,
+        UV_CACHE_DIR: join(stateDir, 'uv-cache'),
+        UV_PYTHON_INSTALL_DIR: join(stateDir, 'uv-python'),
         PYTHONPATH: join(projectDir, 'src'),
         PYTHONUTF8: '1',
         PYTHONIOENCODING: 'utf-8',
-      },
-      windowsHide: true,
-    });
-    if (databaseResult.error) throw databaseResult.error;
-    if (databaseResult.status !== 0) {
-      const output = [databaseResult.stdout, databaseResult.stderr].filter(Boolean).join('\n');
-      throw new Error(`Python 环境已创建，但初始化球队数据库失败: ${output || `exit=${databaseResult.status}`}`);
-    }
+      };
+      await runProcess(uvPath, ['python', 'install', '3.11'], { cwd: stateDir, env: pythonEnv });
+      await runProcess(uvPath, ['venv', '--python', '3.11', pythonEnvironmentDir], { cwd: stateDir, env: pythonEnv });
 
-    writeFileSync(pythonEnvironmentPath, JSON.stringify({
-      pythonPath,
-      pythonVersion,
-    }, null, 2), 'utf8');
-    return {
-      ready: true,
-      pythonPath,
-      pythonVersion,
-      output: databaseResult.stdout.trim(),
-    };
+      const pythonPath = pythonEnvironmentPython();
+      if (!existsSync(pythonPath)) throw new Error(`Python 环境创建后未找到解释器: ${pythonPath}`);
+      const versionResult = await runProcess(pythonPath, [
+        '-c',
+        'import sys; print(f"{sys.version_info.major}.{sys.version_info.minor}.{sys.version_info.micro}")',
+      ], { cwd: stateDir, env: pythonEnv });
+      const pythonVersion = versionResult.stdout.trim();
+      if (!/^3\.11\.\d+$/.test(pythonVersion)) throw new Error(`创建的 Python 版本不符合要求: ${pythonVersion}`);
+
+      const databaseResult = await runProcess(pythonPath, [
+        '-m',
+        'dqd_scroll',
+        'db-init',
+        '--config',
+        configPath,
+        '--teams',
+        join(projectDir, 'teams.json'),
+      ], { cwd: stateDir, env: pythonEnv });
+      writeFileSync(pythonEnvironmentPath, JSON.stringify({
+        pythonPath,
+        pythonVersion,
+      }, null, 2), 'utf8');
+      return {
+        ready: true,
+        pythonPath,
+        pythonVersion,
+        output: databaseResult.output.trim(),
+      };
+    } finally {
+      pythonEnvironmentInstallRunning = false;
+    }
   };
-
-  const runMitmCaRefresh = () => new Promise((resolve, reject) => {
-    if (process.platform !== 'win32') {
-      reject(httpError('此维护脚本只支持 Windows。', 400));
-      return;
-    }
-    if (!existsSync(scriptPath)) {
-      reject(new Error(`维护脚本不存在: ${scriptPath}`));
-      return;
-    }
-    if (activeMaintenanceProcess) {
-      reject(httpError('CA 刷新脚本正在运行。', 409));
-      return;
-    }
-
-    const child = spawn('powershell.exe', [
-      '-NoLogo',
-      '-NoProfile',
-      '-NonInteractive',
-      '-ExecutionPolicy',
-      'Bypass',
-      '-File',
-      scriptPath,
-    ], {
-      cwd: projectDir,
-      windowsHide: true,
-      stdio: ['ignore', 'pipe', 'pipe'],
-    });
-    activeMaintenanceProcess = child;
-    let stdout = '';
-    let stderr = '';
-    let settled = false;
-
-    child.stdout.on('data', (chunk) => {
-      stdout = appendBounded(stdout, chunk);
-    });
-    child.stderr.on('data', (chunk) => {
-      stderr = appendBounded(stderr, chunk);
-    });
-    child.once('error', (error) => {
-      if (settled) return;
-      settled = true;
-      activeMaintenanceProcess = null;
-      reject(error);
-    });
-    child.once('close', (code, signal) => {
-      if (settled) return;
-      settled = true;
-      activeMaintenanceProcess = null;
-      resolve({ code, signal, output: [stdout, stderr].filter(Boolean).join('\n') });
-    });
-  });
 
   return context.webServer.register({
     kind: 'prefix',
@@ -469,25 +437,19 @@ export function registerDqdSettingsApi(context, projectDir, configPath, stateDir
             ok: true,
             settings: readSettingsFromText(text),
             pythonEnvironment: readPythonEnvironment(),
+            availableTeamNames: [...availableTeamNames],
           });
         }
 
         if (request.method === 'POST' && url.pathname === '/api/dqd-scroll/settings') {
-          const settings = validateSettings(await readJsonBody(request));
+          const settings = validateSettings(await readJsonBody(request), availableTeamNames);
           const savedSettings = writeSettings(configPath, settings);
           return sendJson(response, 200, { ok: true, settings: savedSettings });
         }
 
         if (request.method === 'POST' && url.pathname === '/api/dqd-scroll/python-environment/install') {
-          return sendJson(response, 200, { ok: true, pythonEnvironment: installPythonEnvironment() });
-        }
-
-        if (request.method === 'POST' && url.pathname === '/api/dqd-scroll/tools/refresh-mitm-ca') {
-          const result = await runMitmCaRefresh();
-          const ok = result.code === 0;
-          const statusCode = ok ? 200 : 500;
-          const output = result.output || `PowerShell 退出，code=${result.code}，signal=${result.signal ?? 'none'}`;
-          return sendJson(response, statusCode, { ok, output });
+          const pythonEnvironment = await installPythonEnvironment();
+          return sendJson(response, 200, { ok: true, pythonEnvironment });
         }
 
         return sendJson(response, 404, { ok: false, error: `未知请求: ${request.method} ${url.pathname}` });

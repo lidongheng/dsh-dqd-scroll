@@ -2,6 +2,6 @@
 database_path = 'data/dqd_scroll.sqlite3'
 
 [dynamics]
-team_names = ['曼城']
-interests = ['伤病', '训练', '发布会', '马雷斯卡']
+team_names = []
+interests = []
 daily_run_time = '21:00'

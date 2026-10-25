@@ -1,0 +1,30 @@
+name: Cross-platform verification
+
+on:
+  pull_request:
+  push:
+
+jobs:
+  verify:
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+          - windows-latest
+          - macos-latest
+          - ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: npm test
+      - run: node scripts/verify-python-bootstrap.mjs
+      - run: npm pack --dry-run --json
+      - run: python -m compileall -q src/dqd_scroll
+

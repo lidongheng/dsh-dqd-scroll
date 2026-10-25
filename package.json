@@ -1,8 +1,24 @@
 {
   "name": "dsh-dqd-scroll",
-  "version": "0.1.0",
-  "private": true,
+  "version": "0.1.1",
   "description": "DeepSeek Harness 懂球帝阅读插件。",
+  "keywords": [
+    "dsh",
+    "dsh-plugin",
+    "deepseek-harness",
+    "dongqiudi",
+    "football",
+    "daily-report"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/lidongheng/dsh-dqd-scroll.git"
+  },
+  "homepage": "https://github.com/lidongheng/dsh-dqd-scroll#readme",
+  "bugs": {
+    "url": "https://github.com/lidongheng/dsh-dqd-scroll/issues"
+  },
+  "license": "MIT",
   "type": "module",
   "main": "index.js",
   "exports": {
@@ -16,6 +32,7 @@
     "client.js",
     "cordis.patch.yml",
     "docs/api-contract.md",
+    "environment.yml",
     "fixtures/README.md",
     "fixtures/*.json",
     "index.js",
@@ -23,11 +40,11 @@
     "pyproject.toml",
     "README.md",
     "settings-api.js",
+    "lib/uvfetch.mjs",
+    "lib/user-data.js",
     "src/dqd_scroll/*.py",
     "src/dqd_scroll/api/*.py",
-    "src/dqd_scroll/lib/*.py",
-    "tools/README.md",
-    "tools/*.ps1"
+    "src/dqd_scroll/lib/*.py"
   ],
   "engines": {
     "dsh": ">=0.1.7-rc.1",
@@ -45,5 +62,12 @@
         "@deepseek-ai/dsh-client-ui-settings-plugins"
       ]
     }
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
+  },
+  "scripts": {
+    "test": "node --test"
   }
 }

@@ -2,6 +2,38 @@
 
 懂球帝只读阅读助手与 DSH 插件。球队动态日报会按用户配置的懂球帝球队名称解析球队 ID，逐队读取动态分页，并分别生成全部动态和兴趣命中动态两份 Markdown；动态仅在内存处理并写入日报，不进入 SQLite，也不会发送私信。球队名单和赛程仍按现有离线流程清洗、导入和加工。
 
+## 面向用户安装
+
+在 DSH 的 web profile 中运行：
+
+```bash
+dsh plugin --profile web add dsh-dqd-scroll
+```
+
+如果 npm registry 不可用，也可以从公开 GitHub 仓库安装；这条方式要求本机安装 Git：
+
+```bash
+dsh plugin --profile web add github:lidongheng/dsh-dqd-scroll
+```
+
+Electron 桌面版先从托盘菜单完全退出 DSH，再安装到桌面专用 profile：
+
+```bash
+dsh plugin --profile desktop add dsh-dqd-scroll
+```
+
+安装后启动 DSH，打开“设置 → 刷懂球帝”，选择关注球队、填写关注内容和运行时间，再点击“准备运行环境”。首次准备会在本机 DSH 用户数据目录安装经过 SHA-256 校验的 uv 和 Python 3.11，并初始化球队数据库；不需要预装 Python。该步骤需要网络访问 GitHub，Windows、macOS 和常见 Linux x64/ARM64 环境受支持。
+
+配置、Python 环境、SQLite 数据库、运行状态和日报都保存在 DSH 用户数据目录的 `dqd-scroll/` 下。当前动态日报支持 `teams.json` 中列出的 20 支英超球队；名单和赛程在线抓取尚未实现。
+
+从 DSH 卸载：
+
+```bash
+dsh plugin --profile web remove dsh-dqd-scroll
+```
+
+桌面版请把 `web` 替换为 `desktop`。卸载不会自动删除本机用户数据目录。
+
 ## 开发进度与下一步
 
 ### 已完成
@@ -22,12 +54,14 @@
 - [x] 增加 `dynamics-report`：按 DSH 设置中的球队名称从 `teams.json` 的 `dqd_name` 找到懂球帝 ID，每支球队分别生成全部动态和兴趣命中动态报告；不写数据库或原始响应文件。
 - [x] 增加动态日报时间范围入口：可手动传 `--since` 和 `--until`，不传时生成上海时区当天 00:00 到当前时刻的日报。
 - [x] 增加 DSH 插件每日调度：读取配置中的 `daily_run_time`，每天到点后运行动态日报 CLI。
+- [x] 增加无需预装 Python 的首次环境准备：在 DSH 用户数据目录下载并校验 uv，安装 Python 3.11 并初始化 SQLite。
+- [x] 将插件设置、数据库、运行状态和日报移出插件安装目录；首次升级迁移原有本地配置、数据库和日报。
 
 ### 第一版使用边界
 
 - 动态日报和 DSH 每日调度属于第一版可用功能。
 - 名单与赛程目前只支持本地样本导入，不包含实时请求；球员资料、统计和能力值接口仍待核验。
-- DSH 设置页提供关注球队、关注内容、自动运行时间、本机 Python 环境安装和 LDPlayer CA 维护工具；球队名称按 `teams.json` 的 `dqd_name` 精确匹配。每台机器在自己的 DSH 数据目录创建 Python 虚拟环境，并保存该机器的解释器路径。
+- DSH 设置页提供关注球队、关注内容、自动运行时间和本机运行环境准备；球队名称按 `teams.json` 的 `dqd_name` 精确匹配。每台机器在自己的 DSH 数据目录创建 Python 虚拟环境，并保存该机器的解释器路径。
 
 ### 尚未完成
 
@@ -35,7 +69,7 @@
 - [ ] 按核验后的请求契约实现实时球队名单抓取命令。
 - [ ] 用实时请求返回的名单刷新人员 ID、姓名、`attr` 和球队关联，并确认数据库记录与 APP 当前名单一致。
 - [ ] 核验球员资料、球员统计、球员能力值这三个 Postman 请求线索；赛程 URL 和响应样本已收到，但 HTTP 状态、请求头与认证依赖待核验。
-- [x] 增加 DSH 设置页：可编辑关注球队、动态日报运行时间和关注内容，并提供 LDPlayer mitmproxy CA 维护脚本入口。
+- [x] 增加 DSH 设置页：可编辑关注球队、动态日报运行时间和关注内容，并准备本机运行环境。
 
 ### 现在的下一步
 
@@ -43,9 +77,9 @@
 
 把其余请求信息补入 [接口契约记录](docs/api-contract.md)。名单响应样本在 [team-roster.response.sample.json](fixtures/team-roster.response.sample.json)，赛程响应样本在 [team-schedule.response.sample.json](fixtures/team-schedule.response.sample.json)。赛程清洗和对阵视角加工位于 `src/dqd_scroll/lib/team_schedule.py`，导入流程位于 `src/dqd_scroll/workflow.py`；本地导入和报告命令分别是 `schedule-import`、`schedule-report`。赛程响应里的 `season_list[].url` 是服务端提供的赛季链接，不单独证明实际请求头或认证要求。名单、赛程等其他接口只有在契约核验后才实现在线请求。CLI 和 Python 脚本是 DSH 插件的后端调用方式；DeepSeek Harness bundle 入口已提供，项目不实现 MCP 服务。
 
-## 在本机 DeepSeek Harness 中启用
+## 开发工作区链接调试
 
-项目已声明兼容 DSH `0.1.7-rc.1` 或更高版本的 bundle，并由 `cordis.patch.yml` 挂载每日动态日报插件。安装到 Electron 桌面版时，先从托盘菜单完全退出 DeepSeek Harness，再从项目根目录将工作区链接到 `desktop` profile；桌面版运行时会独占该 profile：
+下面的 `link:` 方式只用于从本机源码目录调试；面向用户的安装方式见文档开头。
 
 ```powershell
 dsh plugin --profile desktop add link:C:/www/dsh-dqd-scroll
@@ -58,7 +92,7 @@ dsh --profile desktop --dump-config
 dsh plugin --profile desktop remove dsh-dqd-scroll
 ```
 
-此方式直接使用当前工作区；`config.toml` 和 `teams.json` 随项目分发，SQLite 数据库和日报目录保存在本机项目目录中。首次使用时在 DSH 设置 → 刷懂球帝中点击“安装本机环境并初始化球队数据”，安装器会在该机器的 DSH 数据目录创建独立 Python 虚拟环境，并运行 `db-init` 将 `teams.json` 写入 SQLite 的 `teams` 表。该机器需要安装 Python 3.11+，且 DSH 进程能通过 `python` 命令找到它。之后填写关注球队、关注内容和运行时间；兴趣词与运行时间会写回当前工作区的 `config.toml`。
+首次运行会把 `config.toml` 复制到该机器的 DSH 用户数据目录，并将已有的默认 SQLite 数据库和日报迁移过去。设置页后续只改用户数据目录中的配置；球队映射从插件包的 `teams.json` 读取。
 
 ## 创建并安装 Python 环境
 
@@ -156,7 +190,7 @@ python -m dqd_scroll dynamics-report --config config.toml --since 2026-10-24T11:
 
 DSH 插件必须保持运行，才能在 `daily_run_time` 到达后启动日报 CLI。插件只在 DSH 本机数据目录记录当天是否已成功生成日报和当前 Python 环境路径，不保存动态内容；命令失败时会在下一分钟重试。手动命令不依赖 DSH 定时器。
 
-设置页的“刷新 LDPlayer mitmproxy CA”按钮会调用 `tools/refresh-dqd-mitm-ca.ps1`，执行前会显示确认。它要求 LDPlayer14 的 `emulator-5556` 在线并可用 root，且本机 mitmproxy CA 的 DER SHA-256 与脚本内固定值一致；证书挂载在模拟器重启后失效。脚本仅用于 Windows 本机维护，不是日报调度的一部分。
+`tools/refresh-dqd-mitm-ca.ps1` 是开发者在 LDPlayer14 上维护 mitmproxy CA 的本地脚本，不包含在用户安装包中，也不参与日报流程。
 
 ## 接口验证顺序
 
@@ -192,8 +226,9 @@ src/dqd_scroll/
     team_dynamics.py        校验动态字段并按用户兴趣词筛选
     dynamics_report.py      生成动态 Markdown 日报
 index.js                    DSH 插件入口、设置 API 和每日动态日报调度
-client.js                   DSH 设置页：运行时间、关注内容和维护工具
-settings-api.js             配置读取与写回、固定维护脚本调用
+client.js                   DSH 设置页：运行时间、关注内容和本机环境准备
+settings-api.js             配置读写、本机环境安装和数据库初始化
+lib/uvfetch.mjs             下载并校验 uv 运行时
 cordis.patch.yml            DSH bundle 层，将每日动态调度入口挂载到 profile
 tools/
   README.md                 开发和维护脚本说明

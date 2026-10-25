@@ -3,6 +3,7 @@ import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { registerDqdSettingsApi } from './settings-api.js';
+import { initializeUserData } from './lib/user-data.js';
 
 
 export const name = 'dqd-scroll';
@@ -11,8 +12,6 @@ export const inject = ['webServer'];
 
 export function apply(ctx) {
   const projectDir = dirname(fileURLToPath(import.meta.url));
-  const configPath = join(projectDir, 'config.toml');
-  // Python 环境记录和日报完成状态按机器隔离，避免把本机绝对路径提交到项目配置。
   const dshHomePath = ctx.get('dshHomePath');
   let stateDir = '';
   if (typeof dshHomePath === 'function') stateDir = dshHomePath('dqd-scroll');
@@ -20,7 +19,7 @@ export function apply(ctx) {
   if (typeof stateDir !== 'string' || stateDir.length === 0) {
     throw new Error('DSH 未提供有效的 dshHomePath，无法确定本机运行环境目录。');
   }
-  mkdirSync(stateDir, { recursive: true });
+  const configPath = initializeUserData(projectDir, stateDir);
   const statePath = join(stateDir, 'dynamics-schedule-state.json');
   const pythonEnvironmentPath = join(stateDir, 'python-environment.json');
   ctx.effect(() => registerDqdSettingsApi(ctx, projectDir, configPath, stateDir), 'dqd-scroll 设置页 API');
@@ -115,7 +114,7 @@ export function apply(ctx) {
 
       activeChild = spawn(
         pythonPath,
-        ['-m', 'dqd_scroll', 'dynamics-report', '--config', configPath],
+        ['-m', 'dqd_scroll', 'dynamics-report', '--config', configPath, '--teams', join(projectDir, 'teams.json')],
         {
           cwd: projectDir,
           env: {

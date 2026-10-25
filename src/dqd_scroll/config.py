@@ -103,13 +103,14 @@ def load_team_data(team_data_path: Path) -> tuple[TeamConfig, ...]:
     return tuple(teams);
 
 
-def load_config(config_path: Path) -> ProjectConfig:
+def load_config(config_path: Path, team_data_path: Path | None = None) -> ProjectConfig:
     # 先解析配置文件的绝对路径，数据库相对路径就以该文件所在目录为基准。
     resolved_config_path = config_path.resolve();
     if not resolved_config_path.is_file():
         raise FileNotFoundError(f'配置文件不存在: {resolved_config_path}');
 
-    teams = load_team_data(resolved_config_path.parent / 'teams.json');
+    resolved_team_data_path = team_data_path or resolved_config_path.parent / 'teams.json';
+    teams = load_team_data(resolved_team_data_path);
     raw_config = tomllib.loads(resolved_config_path.read_text(encoding='utf-8'));
 
     if 'database_path' not in raw_config:
@@ -132,8 +133,8 @@ def load_config(config_path: Path) -> ProjectConfig:
                 raise ValueError(f'config.toml 的 dynamics 缺少必填字段: {field_name}');
 
         raw_team_names = raw_dynamics['team_names'];
-        if not isinstance(raw_team_names, list) or not raw_team_names:
-            raise ValueError('config.toml 的 dynamics.team_names 必须是非空球队名称列表。');
+        if not isinstance(raw_team_names, list):
+            raise ValueError('config.toml 的 dynamics.team_names 必须是球队名称列表。');
         team_names = [];
         seen_team_names = set();
         for team_index, team_name in enumerate(raw_team_names, start=1):
