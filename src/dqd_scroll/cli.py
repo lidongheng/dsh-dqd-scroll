@@ -1,5 +1,7 @@
 import argparse;
 import json;
+import logging;
+import sys;
 from calendar import monthrange;
 from datetime import date, datetime, timedelta;
 from pathlib import Path;
@@ -7,13 +9,14 @@ from zoneinfo import ZoneInfo;
 
 from .config import load_config;
 from .lib.report import format_daily_schedule_report;
+from .lib.club_analysis import generate_club_report;
 from .lib.team_schedule import format_team_schedule_report;
 from .repository import Repository;
-from .workflow import build_team_dynamics_reports, save_team_roster_response, save_team_schedule_response;
+from .workflow import build_team_dynamics_reports, save_team_roster_response, save_team_schedule_response, sync_team_roster;
 
 
 def show_status() -> int:
-    print('球队动态只读日报已接入；名单、赛程和球员接口的实时 HTTP 契约仍待核验。');
+    print('球队动态日报、在线名单、本赛季球员联赛统计及能力值已接入；赛程在线请求仍待核验。');
     return 0;
 
 
@@ -38,8 +41,32 @@ def import_team_roster_response(database_path: Path, dqd_team_id: int, response_
     response_body = json.loads(resolved_response_path.read_text(encoding='utf-8'));
 
     saved_count = save_team_roster_response(repository, dqd_team_id, response_body);
-    print(f'从响应文件刷新人员姓名、球衣号码、英文名和 attr，并替换球队名单: {saved_count} 条');
+    print(f'从响应文件刷新人员姓名、球衣号码、英文名、年龄、身价和 attr，并替换球队名单: {saved_count} 条');
     print(f'球队: {team.dqd_name}（懂球帝 ID {dqd_team_id}）');
+    return 0;
+
+
+def synchronize_team_roster(database_path: Path, dqd_team_id: int) -> int:
+    logging.basicConfig(level=logging.INFO, format='%(levelname)s %(message)s');
+    repository = _repository_for_existing_database(database_path);
+    team = repository.get_team(dqd_team_id);
+    season = repository.get_current_season(dqd_team_id);
+    roster_count, statistics_count = sync_team_roster(repository, dqd_team_id);
+    print(f'球队: {team.dqd_name}；联赛: {team.match_league_name}；赛季: {season}');
+    print(f'球队名单已同步: {roster_count} 条；球员统计、能力值、个人资料接口各请求: {statistics_count} 次');
+    return 0;
+
+
+def analyze_club(database_path: Path, dqd_team_id: int, before_round: int | None, output_dir: Path) -> int:
+    logging.basicConfig(level=logging.INFO, format='%(levelname)s %(message)s');
+    try:
+        repository = _repository_for_existing_database(database_path);
+        report_path, markdown = generate_club_report(repository, dqd_team_id, before_round, output_dir);
+    except (ValueError, RuntimeError, OSError) as error:
+        print(f'分析失败：{error}', file=sys.stderr);
+        return 1;
+    print(markdown, end='');
+    print(f'报告已保存：{report_path}', file=sys.stderr);
     return 0;
 
 
@@ -205,6 +232,18 @@ def build_parser() -> argparse.ArgumentParser:
     roster_parser.add_argument('--response-file', type=Path, required=True, help='球队名单 JSON 响应文件');
     roster_parser.set_defaults(handler=import_team_roster_response);
 
+    roster_sync_parser = subparsers.add_parser('roster-sync', help='抓取名单后逐个连续抓取球员统计、能力值及个人资料，球员之间等待一秒');
+    roster_sync_parser.add_argument('--database', type=Path, required=True, help='已初始化并导入当前赛季的 SQLite 数据库');
+    roster_sync_parser.add_argument('--team-id', type=int, required=True, help='懂球帝球队 ID');
+    roster_sync_parser.set_defaults(handler=synchronize_team_roster);
+
+    club_parser = subparsers.add_parser('club-analyze', help='分析当前赛季国内联赛出场、阵型和推荐首发，首版支持英超');
+    club_parser.add_argument('--database', type=Path, required=True, help='已同步名单及个人资料的 SQLite 数据库');
+    club_parser.add_argument('--team-id', type=int, required=True, help='懂球帝球队 ID');
+    club_parser.add_argument('--before-round', type=int, help='仅分析指定轮次之前的已完赛比赛');
+    club_parser.add_argument('--output-dir', type=Path, default=Path('out/club-analysis'), help='报告输出根目录');
+    club_parser.set_defaults(handler=analyze_club);
+
     schedule_import_parser = subparsers.add_parser(
         'schedule-import',
         help='从响应文件清洗、去重并导入球队最新赛季赛程',
@@ -264,6 +303,10 @@ def main() -> int:
         return args.handler(args.config, args.teams);
     if args.command == 'schedule-report':
         return args.handler(args.database, args.team_id);
+    if args.command == 'roster-sync':
+        return args.handler(args.database, args.team_id);
+    if args.command == 'club-analyze':
+        return args.handler(args.database, args.team_id, args.before_round, args.output_dir);
     if args.command == 'daily-report':
         return args.handler(args.database, args.team_id, args.as_of);
     if args.command == 'dynamics-report':

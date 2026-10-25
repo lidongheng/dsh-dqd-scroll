@@ -1,0 +1,595 @@
+{
+  "source": "clubMatchAnalyzer.js and recommendedLineup.js; fixed home/away HTML; no live requests",
+  "parsed": [
+    {
+      "id": 3003856,
+      "formation": "4231",
+      "players": [
+        {
+          "number": "1",
+          "name": "多纳鲁马",
+          "position": "GK",
+          "caps": 1,
+          "lineups": 1,
+          "goals": 0,
+          "assists": 0
+        },
+        {
+          "number": "24",
+          "name": "格瓦迪奥尔",
+          "position": "LB",
+          "caps": 1,
+          "lineups": 1,
+          "goals": 1,
+          "assists": 0
+        },
+        {
+          "number": "3",
+          "name": "迪亚斯",
+          "position": "CB",
+          "caps": 1,
+          "lineups": 1,
+          "goals": 0,
+          "assists": 0
+        },
+        {
+          "number": "45",
+          "name": "胡桑诺夫",
+          "position": "CB",
+          "caps": 1,
+          "lineups": 1,
+          "goals": 0,
+          "assists": 0
+        },
+        {
+          "number": "82",
+          "name": "R·刘易斯",
+          "position": "RB",
+          "caps": 1,
+          "lineups": 1,
+          "goals": 0,
+          "assists": 0
+        },
+        {
+          "number": "6",
+          "name": "格伊",
+          "position": "CDM",
+          "caps": 1,
+          "lineups": 1,
+          "goals": 1,
+          "assists": 0
+        },
+        {
+          "number": "5",
+          "name": "安德森",
+          "position": "CDM",
+          "caps": 1,
+          "lineups": 1,
+          "goals": 0,
+          "assists": 0
+        },
+        {
+          "number": "42",
+          "name": "塞梅尼奥",
+          "position": "LM",
+          "caps": 1,
+          "lineups": 1,
+          "goals": 0,
+          "assists": 0
+        },
+        {
+          "number": "33",
+          "name": "奥莱利",
+          "position": "CAM",
+          "caps": 1,
+          "lineups": 1,
+          "goals": 0,
+          "assists": 0
+        },
+        {
+          "number": "47",
+          "name": "福登",
+          "position": "RM",
+          "caps": 1,
+          "lineups": 1,
+          "goals": 0,
+          "assists": 0
+        },
+        {
+          "number": "9",
+          "name": "哈兰德",
+          "position": "ST",
+          "caps": 1,
+          "lineups": 1,
+          "goals": 0,
+          "assists": 0
+        },
+        {
+          "number": "27",
+          "name": "努内斯",
+          "position": "Substitute",
+          "caps": 1,
+          "lineups": 0,
+          "goals": 0,
+          "assists": 0
+        },
+        {
+          "number": "8",
+          "name": "科瓦契奇",
+          "position": "Substitute",
+          "caps": 1,
+          "lineups": 0,
+          "goals": 0,
+          "assists": 0
+        },
+        {
+          "number": "10",
+          "name": "切尔基",
+          "position": "Substitute",
+          "caps": 1,
+          "lineups": 0,
+          "goals": 0,
+          "assists": 2
+        },
+        {
+          "number": "18",
+          "name": "格拉利什",
+          "position": "Substitute",
+          "caps": 1,
+          "lineups": 0,
+          "goals": 0,
+          "assists": 0
+        },
+        {
+          "number": "28",
+          "name": "鲁利",
+          "position": "Substitute",
+          "caps": 0,
+          "lineups": 0,
+          "goals": 0,
+          "assists": 0
+        },
+        {
+          "number": "21",
+          "name": "艾特·努里",
+          "position": "Substitute",
+          "caps": 0,
+          "lineups": 0,
+          "goals": 0,
+          "assists": 0
+        },
+        {
+          "number": "22",
+          "name": "雷斯",
+          "position": "Substitute",
+          "caps": 0,
+          "lineups": 0,
+          "goals": 0,
+          "assists": 0
+        },
+        {
+          "number": "14",
+          "name": "尼科.冈萨雷斯",
+          "position": "Substitute",
+          "caps": 0,
+          "lineups": 0,
+          "goals": 0,
+          "assists": 0
+        },
+        {
+          "number": "7",
+          "name": "马尔穆什",
+          "position": "Substitute",
+          "caps": 0,
+          "lineups": 0,
+          "goals": 0,
+          "assists": 0
+        }
+      ]
+    },
+    {
+      "id": 3003863,
+      "formation": "4231",
+      "players": [
+        {
+          "number": "9",
+          "name": "哈兰德",
+          "position": "ST",
+          "caps": 1,
+          "lineups": 1,
+          "goals": 2,
+          "assists": 0
+        },
+        {
+          "number": "47",
+          "name": "福登",
+          "position": "RM",
+          "caps": 1,
+          "lineups": 1,
+          "goals": 0,
+          "assists": 2
+        },
+        {
+          "number": "10",
+          "name": "切尔基",
+          "position": "CAM",
+          "caps": 1,
+          "lineups": 1,
+          "goals": 2,
+          "assists": 0
+        },
+        {
+          "number": "42",
+          "name": "塞梅尼奥",
+          "position": "LM",
+          "caps": 1,
+          "lineups": 1,
+          "goals": 0,
+          "assists": 1
+        },
+        {
+          "number": "33",
+          "name": "奥莱利",
+          "position": "CDM",
+          "caps": 1,
+          "lineups": 1,
+          "goals": 0,
+          "assists": 0
+        },
+        {
+          "number": "5",
+          "name": "安德森",
+          "position": "CDM",
+          "caps": 1,
+          "lineups": 1,
+          "goals": 0,
+          "assists": 0
+        },
+        {
+          "number": "45",
+          "name": "胡桑诺夫",
+          "position": "RB",
+          "caps": 1,
+          "lineups": 1,
+          "goals": 0,
+          "assists": 0
+        },
+        {
+          "number": "3",
+          "name": "迪亚斯",
+          "position": "CB",
+          "caps": 1,
+          "lineups": 1,
+          "goals": 0,
+          "assists": 0
+        },
+        {
+          "number": "6",
+          "name": "格伊",
+          "position": "CB",
+          "caps": 1,
+          "lineups": 1,
+          "goals": 0,
+          "assists": 0
+        },
+        {
+          "number": "24",
+          "name": "格瓦迪奥尔",
+          "position": "LB",
+          "caps": 1,
+          "lineups": 1,
+          "goals": 0,
+          "assists": 1
+        },
+        {
+          "number": "1",
+          "name": "多纳鲁马",
+          "position": "GK",
+          "caps": 1,
+          "lineups": 1,
+          "goals": 1,
+          "assists": 0
+        },
+        {
+          "number": "8",
+          "name": "科瓦契奇",
+          "position": "Substitute",
+          "caps": 1,
+          "lineups": 0,
+          "goals": 0,
+          "assists": 0
+        },
+        {
+          "number": "32",
+          "name": "布阿迪",
+          "position": "Substitute",
+          "caps": 1,
+          "lineups": 0,
+          "goals": 0,
+          "assists": 0
+        },
+        {
+          "number": "56",
+          "name": "麦凯杜",
+          "position": "Substitute",
+          "caps": 1,
+          "lineups": 0,
+          "goals": 0,
+          "assists": 0
+        },
+        {
+          "number": "22",
+          "name": "雷斯",
+          "position": "Substitute",
+          "caps": 1,
+          "lineups": 0,
+          "goals": 0,
+          "assists": 0
+        },
+        {
+          "number": "61",
+          "name": "K·布莱斯维特",
+          "position": "Substitute",
+          "caps": 1,
+          "lineups": 0,
+          "goals": 0,
+          "assists": 0
+        },
+        {
+          "number": "28",
+          "name": "鲁利",
+          "position": "Substitute",
+          "caps": 0,
+          "lineups": 0,
+          "goals": 0,
+          "assists": 0
+        },
+        {
+          "number": "21",
+          "name": "艾特·努里",
+          "position": "Substitute",
+          "caps": 0,
+          "lineups": 0,
+          "goals": 0,
+          "assists": 0
+        },
+        {
+          "number": "82",
+          "name": "R·刘易斯",
+          "position": "Substitute",
+          "caps": 0,
+          "lineups": 0,
+          "goals": 0,
+          "assists": 0
+        },
+        {
+          "number": "30",
+          "name": "埃切维里",
+          "position": "Substitute",
+          "caps": 0,
+          "lineups": 0,
+          "goals": 0,
+          "assists": 0
+        }
+      ]
+    }
+  ],
+  "players": {
+    "1": {
+      "caps": 2,
+      "lineups": 2,
+      "goals": 1,
+      "assists": 0,
+      "positions": {
+        "GK": 2
+      }
+    },
+    "3": {
+      "caps": 2,
+      "lineups": 2,
+      "goals": 0,
+      "assists": 0,
+      "positions": {
+        "CB": 2
+      }
+    },
+    "5": {
+      "caps": 2,
+      "lineups": 2,
+      "goals": 0,
+      "assists": 0,
+      "positions": {
+        "CDM": 2
+      }
+    },
+    "6": {
+      "caps": 2,
+      "lineups": 2,
+      "goals": 1,
+      "assists": 0,
+      "positions": {
+        "CDM": 1,
+        "CB": 1
+      }
+    },
+    "7": {
+      "caps": 0,
+      "lineups": 0,
+      "goals": 0,
+      "assists": 0,
+      "positions": {}
+    },
+    "8": {
+      "caps": 2,
+      "lineups": 0,
+      "goals": 0,
+      "assists": 0,
+      "positions": {}
+    },
+    "9": {
+      "caps": 2,
+      "lineups": 2,
+      "goals": 2,
+      "assists": 0,
+      "positions": {
+        "ST": 2
+      }
+    },
+    "10": {
+      "caps": 2,
+      "lineups": 1,
+      "goals": 2,
+      "assists": 2,
+      "positions": {
+        "CAM": 1
+      }
+    },
+    "21": {
+      "caps": 0,
+      "lineups": 0,
+      "goals": 0,
+      "assists": 0,
+      "positions": {}
+    },
+    "22": {
+      "caps": 1,
+      "lineups": 0,
+      "goals": 0,
+      "assists": 0,
+      "positions": {}
+    },
+    "24": {
+      "caps": 2,
+      "lineups": 2,
+      "goals": 1,
+      "assists": 1,
+      "positions": {
+        "LB": 2
+      }
+    },
+    "27": {
+      "caps": 1,
+      "lineups": 0,
+      "goals": 0,
+      "assists": 0,
+      "positions": {}
+    },
+    "28": {
+      "caps": 0,
+      "lineups": 0,
+      "goals": 0,
+      "assists": 0,
+      "positions": {}
+    },
+    "32": {
+      "caps": 1,
+      "lineups": 0,
+      "goals": 0,
+      "assists": 0,
+      "positions": {}
+    },
+    "33": {
+      "caps": 2,
+      "lineups": 2,
+      "goals": 0,
+      "assists": 0,
+      "positions": {
+        "CAM": 1,
+        "CDM": 1
+      }
+    },
+    "42": {
+      "caps": 2,
+      "lineups": 2,
+      "goals": 0,
+      "assists": 1,
+      "positions": {
+        "LM": 2
+      }
+    },
+    "45": {
+      "caps": 2,
+      "lineups": 2,
+      "goals": 0,
+      "assists": 0,
+      "positions": {
+        "CB": 1,
+        "RB": 1
+      }
+    },
+    "47": {
+      "caps": 2,
+      "lineups": 2,
+      "goals": 0,
+      "assists": 2,
+      "positions": {
+        "RM": 2
+      }
+    },
+    "56": {
+      "caps": 1,
+      "lineups": 0,
+      "goals": 0,
+      "assists": 0,
+      "positions": {}
+    },
+    "82": {
+      "caps": 1,
+      "lineups": 1,
+      "goals": 0,
+      "assists": 0,
+      "positions": {
+        "RB": 1
+      }
+    }
+  },
+  "formations": {
+    "4231": 2
+  },
+  "recommended": [
+    [
+      "1",
+      "GK"
+    ],
+    [
+      "24",
+      "LB"
+    ],
+    [
+      "3",
+      "CB"
+    ],
+    [
+      "45",
+      "CB"
+    ],
+    [
+      "82",
+      "RB"
+    ],
+    [
+      "5",
+      "CDM"
+    ],
+    [
+      "6",
+      "CDM"
+    ],
+    [
+      "42",
+      "LM"
+    ],
+    [
+      "33",
+      "CAM"
+    ],
+    [
+      "47",
+      "RM"
+    ],
+    [
+      "9",
+      "ST"
+    ]
+  ]
+}

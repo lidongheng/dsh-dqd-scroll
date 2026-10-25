@@ -6,7 +6,10 @@ from contextlib import closing, contextmanager;
 from pathlib import Path;
 
 from .config import TeamConfig;
-from .models import RosterMember, Team, TeamSchedule, TeamScheduleMatch;
+from .models import PlayerAbility, PlayerProfile, PlayerStatistics, RosterMember, Team, TeamSchedule, TeamScheduleMatch;
+
+
+PLAYER_STATISTIC_FIELDS = ('caps', 'lineups', 'goals', 'assists', 'rescues');
 
 
 class Repository:
@@ -49,7 +52,11 @@ class Repository:
                 'person_name TEXT NOT NULL, '
                 'attr TEXT NOT NULL, '
                 'shirt_number TEXT, '
-                'person_en_name TEXT'
+                'person_en_name TEXT, '
+                'age TEXT, social_status TEXT, nationality TEXT, height INTEGER, weight INTEGER, '
+                'caps INTEGER, lineups INTEGER, goals INTEGER, assists INTEGER, rescues INTEGER, '
+                'ability INTEGER, position TEXT, '
+                'stats_season TEXT, stats_league_serial INTEGER'
                 ');'
             );
             connection.execute(
@@ -143,6 +150,18 @@ class Repository:
             if 'person_en_name' not in player_columns:
                 connection.execute('ALTER TABLE players ADD COLUMN person_en_name TEXT;');
                 player_columns.add('person_en_name');
+            for column in ('age', 'social_status', 'nationality'):
+                if column not in player_columns:
+                    connection.execute(f'ALTER TABLE players ADD COLUMN {column} TEXT;');
+            for column in PLAYER_STATISTIC_FIELDS + ('ability', 'height', 'weight'):
+                if column not in player_columns:
+                    connection.execute(f'ALTER TABLE players ADD COLUMN {column} INTEGER;');
+            if 'position' not in player_columns:
+                connection.execute('ALTER TABLE players ADD COLUMN position TEXT;');
+            if 'stats_season' not in player_columns:
+                connection.execute('ALTER TABLE players ADD COLUMN stats_season TEXT;');
+            if 'stats_league_serial' not in player_columns:
+                connection.execute('ALTER TABLE players ADD COLUMN stats_league_serial INTEGER;');
             team_player_columns = {row[1] for row in connection.execute('PRAGMA table_info(team_players);').fetchall()};
             if 'attr' in team_player_columns:
                 # 从旧的球队关联表迁移 attr；同一人员在多个队有记录时按 team_id 顺序取一条旧值。
@@ -220,8 +239,125 @@ class Repository:
             match_league_name=row[6],
         );
 
+    def get_current_season(self, team_id: int) -> str:
+        _require_positive_id(team_id, 'team_id');
+        with self._connection() as connection:
+            row = connection.execute(
+                'SELECT ls.season FROM teams AS t '
+                'JOIN league_seasons AS ls ON ls.league_serial = t.league_serial '
+                'WHERE t.team_id = ?;',
+                (team_id,),
+            ).fetchone();
+        if row is None:
+            raise ValueError(f'team_id={team_id} 没有 league_seasons 当前赛季记录，请先导入赛程。');
+        return row[0];
+
+    def replace_team_player_details(
+        self,
+        team_id: int,
+        season: str,
+        statistics: Iterable[PlayerStatistics],
+        abilities: Iterable[PlayerAbility],
+        profiles: Iterable[PlayerProfile],
+    ) -> None:
+        _require_positive_id(team_id, 'team_id');
+        records = list(statistics);
+        if not records or not all(isinstance(record, PlayerStatistics) for record in records):
+            raise ValueError('statistics must contain PlayerStatistics records.');
+        person_ids = [record.person_id for record in records];
+        if len(set(person_ids)) != len(person_ids):
+            raise ValueError('statistics contains duplicate person_id values.');
+        for record in records:
+            _require_positive_id(record.person_id, 'person_id');
+            for field in PLAYER_STATISTIC_FIELDS:
+                value = getattr(record, field);
+                if value is not None and (isinstance(value, bool) or not isinstance(value, int) or value < 0):
+                    raise ValueError(f'{field} must be a non-negative integer or None.');
+            base_values = (record.caps, record.lineups, record.goals, record.assists);
+            if any(value is None for value in base_values) and not all(value is None for value in base_values):
+                raise ValueError('caps, lineups, goals and assists must all be present or all be None.');
+
+        ability_records = list(abilities);
+        if not ability_records or not all(isinstance(record, PlayerAbility) for record in ability_records):
+            raise ValueError('abilities must contain PlayerAbility records.');
+        for record in ability_records:
+            _require_positive_id(record.person_id, 'person_id');
+            if (record.ability is None) != (record.position is None):
+                raise ValueError('ability and position must both be present or both be None.');
+            if record.ability is not None:
+                if isinstance(record.ability, bool) or not isinstance(record.ability, int) or record.ability < 0:
+                    raise ValueError('ability must be a non-negative integer or None.');
+                if not isinstance(record.position, str) or not record.position.strip():
+                    raise ValueError('position must be a non-empty string or None.');
+        abilities_by_id = {record.person_id: record for record in ability_records};
+        if len(abilities_by_id) != len(ability_records) or set(abilities_by_id) != set(person_ids):
+            raise ValueError('能力值人员必须与统计人员完全一致且不重复。');
+
+        profile_records = list(profiles);
+        if not all(isinstance(record, PlayerProfile) for record in profile_records):
+            raise ValueError('profiles must contain PlayerProfile records.');
+        profiles_by_id = {record.person_id: record for record in profile_records};
+        if len(profiles_by_id) != len(profile_records) or set(profiles_by_id) != set(person_ids):
+            raise ValueError('个人资料人员必须与统计人员完全一致且不重复。');
+        for record in profile_records:
+            if not isinstance(record.nationality, str) or not record.nationality.strip():
+                raise ValueError('nationality must be a non-empty string.');
+            for value in (record.height, record.weight):
+                if isinstance(value, bool) or not isinstance(value, int) or value <= 0:
+                    raise ValueError('height and weight must be positive integers.');
+
+        # 提交前再次核验赛季和名单，避免抓取途中来源变化后写入过期细节。
+        with self._connection() as connection:
+            connection.execute('BEGIN IMMEDIATE;');
+            season_row = connection.execute(
+                'SELECT t.league_serial, ls.season FROM teams AS t '
+                'JOIN league_seasons AS ls ON ls.league_serial = t.league_serial WHERE t.team_id = ?;',
+                (team_id,),
+            ).fetchone();
+            if season_row is None or season_row[1] != season:
+                raise ValueError('抓取期间 league_seasons 已变化，拒绝写入过期赛季统计。');
+            players = dict(connection.execute(
+                'SELECT p.person_id, p.attr FROM players AS p '
+                'JOIN team_players AS tp ON tp.person_id = p.person_id '
+                'WHERE tp.team_id = ? AND p.attr != ?;',
+                (team_id, '主教练'),
+            ).fetchall());
+            if set(players) != set(person_ids):
+                raise ValueError('统计人员与当前球队球员名单不一致，拒绝写入。');
+            for record in records:
+                if players[record.person_id] != '门将' and record.rescues is not None:
+                    raise ValueError('非门将的 rescues 必须为 None。');
+                if players[record.person_id] == '门将' and (record.caps is None) != (record.rescues is None):
+                    raise ValueError('门将有联赛统计时必须同时提供 rescues。');
+            connection.executemany(
+                'UPDATE players SET caps = ?, lineups = ?, goals = ?, assists = ?, rescues = ?, '
+                'ability = ?, position = ?, nationality = ?, height = ?, weight = ?, '
+                'stats_season = ?, stats_league_serial = ? WHERE person_id = ?;',
+                [
+                    (record.caps, record.lineups, record.goals, record.assists, record.rescues,
+                     abilities_by_id[record.person_id].ability, abilities_by_id[record.person_id].position,
+                     profiles_by_id[record.person_id].nationality,
+                     profiles_by_id[record.person_id].height, profiles_by_id[record.person_id].weight,
+                     season, season_row[0], record.person_id)
+                    for record in records
+                ],
+            );
+
+    def get_club_players(self, team_id: int) -> list[dict]:
+        self.get_team(team_id);
+        with self._connection() as connection:
+            connection.row_factory = sqlite3.Row;
+            rows = connection.execute(
+                'SELECT p.* FROM players p JOIN team_players tp ON tp.person_id = p.person_id '
+                'WHERE tp.team_id = ? AND p.attr != ? ORDER BY tp.rowid;',
+                (team_id, '主教练'),
+            ).fetchall();
+        if not rows:
+            raise ValueError('球队没有球员名单，请先运行 roster-sync。');
+        return [dict(row) for row in rows];
+
     def replace_team_players(self, team_id: int, members: Iterable[RosterMember]) -> int:
-        # 传入的是已经校验过的名单记录；每次同步都更新人员表中的姓名和 attr。
+        # 传入的是已经校验过的名单记录；每次同步都更新人员资料和球衣号码。
         _require_positive_id(team_id, 'team_id');
         roster_members = list(members);
         if not roster_members:
@@ -240,22 +376,29 @@ class Repository:
                 raise ValueError('shirt_number must be a string or None.');
             if member.person_en_name is not None and not isinstance(member.person_en_name, str):
                 raise ValueError('person_en_name must be a string or None.');
+            if not isinstance(member.age, str) or not member.age.strip():
+                raise ValueError('age must be a non-empty string.');
+            if member.social_status is not None and not isinstance(member.social_status, str):
+                raise ValueError('social_status must be a string or None.');
             player_ids.append(member.person_id);
         if len(set(player_ids)) != len(player_ids):
             raise ValueError('members contains duplicate person_id values.');
 
-        # 一个事务里更新姓名和 attr、删除旧关联并写入新关联；任一步失败都会整体回滚。
+        # 一个事务里更新人员资料、删除旧关联并写入新关联；任一步失败都会整体回滚。
         with self._connection() as connection:
             connection.execute('PRAGMA foreign_keys = ON;');
             connection.execute('BEGIN IMMEDIATE;');
             connection.executemany(
                 'INSERT INTO players '
-                '(person_id, person_name, attr, shirt_number, person_en_name) VALUES (?, ?, ?, ?, ?) '
+                '(person_id, person_name, attr, shirt_number, person_en_name, age, social_status) '
+                'VALUES (?, ?, ?, ?, ?, ?, ?) '
                 'ON CONFLICT(person_id) DO UPDATE SET '
                 'person_name = excluded.person_name, '
                 'attr = excluded.attr, '
                 'shirt_number = excluded.shirt_number, '
-                'person_en_name = excluded.person_en_name;',
+                'person_en_name = excluded.person_en_name, '
+                'age = excluded.age, '
+                'social_status = excluded.social_status;',
                 [
                     (
                         member.person_id,
@@ -263,6 +406,8 @@ class Repository:
                         member.attr,
                         member.shirt_number,
                         member.person_en_name,
+                        member.age,
+                        member.social_status,
                     )
                     for member in roster_members
                 ],
@@ -328,6 +473,13 @@ class Repository:
                 if schedule.season != current_season[0]:
                     raise ValueError('相同 season_sort 对应了不同 season，拒绝覆盖赛季映射。');
             if current_season is not None and schedule.season_sort > current_season[1]:
+                # 切换联赛赛季时清除旧统计，避免 players 展示上赛季的数据。
+                connection.execute(
+                    'UPDATE players SET caps = NULL, lineups = NULL, goals = NULL, assists = NULL, '
+                    'rescues = NULL, ability = NULL, position = NULL, stats_season = NULL, stats_league_serial = NULL '
+                    'WHERE stats_league_serial = ?;',
+                    (schedule.league_serial,),
+                );
                 # 新赛季开始时，联赛内所有球队的上一赛季赛程一并清除。
                 connection.execute(
                     'DELETE FROM team_schedules WHERE league_serial = ?;',

@@ -24,7 +24,7 @@ dsh plugin --profile desktop add dsh-dqd-scroll
 
 安装后启动 DSH，打开“设置 → 刷懂球帝”，选择关注球队、填写关注内容和运行时间，再点击“准备运行环境”。首次准备会在本机 DSH 用户数据目录安装经过 SHA-256 校验的 uv、Python 3.11 和项目声明的 Python 依赖，并初始化球队数据库；不需要预装 Python。该步骤需要网络访问 GitHub 和 PyPI，Windows、macOS 和常见 Linux x64/ARM64 环境受支持。
 
-配置、Python 环境、SQLite 数据库、运行状态和日报都保存在 DSH 用户数据目录的 `dqd-scroll/` 下。当前动态日报支持 `teams.json` 中列出的 20 支英超球队；名单和赛程在线抓取尚未实现。
+配置、Python 环境、SQLite 数据库、运行状态和日报都保存在 DSH 用户数据目录的 `dqd-scroll/` 下。当前动态日报支持 `teams.json` 中列出的 20 支英超球队；名单及球员联赛统计可通过 `roster-sync` 在线同步；赛程在线抓取尚未实现。
 
 从 DSH 卸载：
 
@@ -41,10 +41,11 @@ dsh plugin --profile web remove dsh-dqd-scroll
 - [x] 创建 Conda 环境和 Python 包结构。
 - [x] 提供 `status`、`db-init`、离线 `roster-import`、`schedule-import` 和 `schedule-report` CLI 命令。
 - [x] 在项目根目录 `teams.json` 中保存 20 支球队的懂球帝/球探映射，以及英超联赛信息。
-- [x] 初始化 SQLite：`teams` 表由 `teams.json` 种子数据填充；当前开发数据库已导入曼城 24 名球员、1 名主教练，以及 `league_serial=36` 对应的 `2026/2027` 赛季和 52 场赛程；实时抓取仍未实现。
+- [x] 初始化 SQLite：`teams` 表由 `teams.json` 种子数据填充；当前开发数据库已导入曼城 24 名球员、1 名主教练，以及 `league_serial=36` 对应的 `2026/2027` 赛季和 52 场赛程；名单及球员统计的实时抓取已接入。
 - [x] 根据用户提供的名单响应，确认球员分组位于 `data.list`，人员 ID、姓名、球衣号码和英文名分别取自 `person_id`、`person_name`、`shirtnumber`、`person_en_name`；球员位置取分组标题。
 - [x] 编写离线响应校验和解析：导入前锋、中场、后卫、门将及唯一主教练，跳过其他教练和工作人员；共 25 条名单记录。
 - [x] 增加 `roster-import` 命令：每次导入都会刷新人员姓名和 `attr` 并替换该队名单关联；这是读取本地样本，不是实时抓取。
+- [x] 增加 `roster-sync`：在线抓取名单后，同一球员连续抓取统计和能力，球员之间等待一秒，主教练跳过。
 - [x] 根据用户提供的球队赛程 URL 和响应样本，识别 `season_list` 当前赛季及 `data` 中的比赛字段。
 - [x] 增加 `league_seasons` 中间表，以 `league_serial` 对应唯一最新 `season`；赛季升级时会在同一事务内删除该联赛旧赛季赛程。
 - [x] 增加 `team_schedules` 表、赛程字段校验、按 `match_id` 去重和冲突拒绝；空赛程不会清空已有记录。
@@ -61,22 +62,22 @@ dsh plugin --profile web remove dsh-dqd-scroll
 ### 第一版使用边界
 
 - 动态日报和 Windows/macOS 每日调度属于第一版可用功能。
-- 名单与赛程目前只支持本地样本导入，不包含实时请求；球员资料、统计和能力值接口仍待核验。
+- 名单及本赛季球员联赛统计支持 `roster-sync` 在线同步；赛程目前只支持本地样本导入，球员资料接口仍待核验，能力值和场上位置已接入。
 - DSH 设置页提供关注球队、关注内容、自动运行时间和本机运行环境准备；球队名称按 `teams.json` 的 `dqd_name` 精确匹配。每台机器在自己的 DSH 数据目录创建 Python 虚拟环境，并保存该机器的解释器路径。
 
 ### 尚未完成
 
-- [ ] 继续核验球队赛程和名单接口的真实 HTTP 方法、HTTP 状态、必要请求头和认证依赖；这些接口仍未实现在线请求。
+- [ ] 继续核验球队赛程接口的真实 HTTP 方法、HTTP 状态、必要请求头和认证依赖；赛程尚未实现在线请求。
 - [ ] 按核验后的请求契约实现实时球队名单抓取命令。
 - [ ] 用实时请求返回的名单刷新人员 ID、姓名、`attr` 和球队关联，并确认数据库记录与 APP 当前名单一致。
-- [ ] 核验球员资料、球员统计、球员能力值这三个 Postman 请求线索；赛程 URL 和响应样本已收到，但 HTTP 状态、请求头与认证依赖待核验。
+- [ ] 继续核验球员资料请求线索；球员统计和能力值已实测接入；赛程 URL 和响应样本已收到，但 HTTP 状态、请求头与认证依赖待核验。
 - [x] 增加 DSH 设置页：可编辑关注球队、动态日报运行时间和关注内容，并准备本机运行环境。
 
 ### 现在的下一步
 
 曼城动态只读请求已通过 mitmweb 与 Postman 核验并接入日报流程；日报会按设置中的球队名称从 `teams.json` 的 `dqd_name` 映射 ID 并逐队请求。其他接口（球队名单、赛程、球员资料与统计）仍需分别核验请求契约；不要把真实 Cookie、Token 或账号标识写入项目或发给我。
 
-把其余请求信息补入 [接口契约记录](docs/api-contract.md)。名单响应样本在 [team-roster.response.sample.json](fixtures/team-roster.response.sample.json)，赛程响应样本在 [team-schedule.response.sample.json](fixtures/team-schedule.response.sample.json)。赛程清洗和对阵视角加工位于 `src/dqd_scroll/lib/team_schedule.py`，导入流程位于 `src/dqd_scroll/workflow.py`；本地导入和报告命令分别是 `schedule-import`、`schedule-report`。赛程响应里的 `season_list[].url` 是服务端提供的赛季链接，不单独证明实际请求头或认证要求。名单、赛程等其他接口只有在契约核验后才实现在线请求。CLI 和 Python 脚本是 DSH 插件的后端调用方式；DeepSeek Harness bundle 入口已提供，项目不实现 MCP 服务。
+把其余请求信息补入 [接口契约记录](docs/api-contract.md)。名单响应样本在 [team-roster.response.sample.json](fixtures/team-roster.response.sample.json)，赛程响应样本在 [team-schedule.response.sample.json](fixtures/team-schedule.response.sample.json)。赛程清洗和对阵视角加工位于 `src/dqd_scroll/lib/team_schedule.py`，导入流程位于 `src/dqd_scroll/workflow.py`；本地导入和报告命令分别是 `schedule-import`、`schedule-report`。赛程响应里的 `season_list[].url` 是服务端提供的赛季链接，不单独证明实际请求头或认证要求。在线名单、球员本赛季联赛统计及能力值由 `roster-sync` 执行；赛程和其他球员资料接口仍待契约核验后实现在线请求。CLI 和 Python 脚本是 DSH 插件的后端调用方式；DeepSeek Harness bundle 入口已提供，项目不实现 MCP 服务。
 
 ## 开发工作区链接调试
 
@@ -142,6 +143,7 @@ python -m dqd_scroll status
 python -m dqd_scroll db-init --config config.toml
 python -m dqd_scroll roster-import --database data/dqd_scroll.sqlite3 --team-id 50000529 --response-file fixtures/team-roster.response.sample.json
 python -m dqd_scroll schedule-import --database data/dqd_scroll.sqlite3 --team-id 50000529 --response-file fixtures/team-schedule.response.sample.json --request-url 'https://sport-data.dongqiudi.com/soccer/biz/dqd/team/schedule/50000529?app=dqd&version=444&lang=zh-cn&season=2026-2027'
+python -m dqd_scroll roster-sync --database data/dqd_scroll.sqlite3 --team-id 50000529
 python -m dqd_scroll schedule-report --database data/dqd_scroll.sqlite3 --team-id 50000529
 python -m dqd_scroll daily-report --database data/dqd_scroll.sqlite3 --team-id 50000529 --as-of 2026-10-25
 ```
@@ -150,11 +152,19 @@ python -m dqd_scroll daily-report --database data/dqd_scroll.sqlite3 --team-id 5
 
 `teams.json` 只包含球队及联赛映射，不包含球员名单或赛程。新机器运行安装初始化后会得到 `teams` 表，但需要再用对应的名单、赛程样本运行 `roster-import` 和 `schedule-import`；其他机器已有的 `data/` SQLite 文件不会随代码仓库同步。
 
-`roster-import` 使用 `--database` 指定已初始化的数据库，并读取本地 JSON 响应文件，不会访问懂球帝；导入前会确认球队已存在于 SQLite。已有数据库先运行 `db-init`，它会迁移 `players` 表并添加新列。名单导入会校验人员 ID、姓名、球员的球衣号码和英文名及 `attr`，在同一事务中刷新 `players` 人员资料并替换指定球队的 `team_players` 关联。接口字段 `shirtnumber` 写入 `players.shirt_number`，`person_en_name` 写入同名列；教练记录没有这两个球员字段，数据库中保留为 `NULL`。`players.attr` 保存球员位置（前锋、中场、后卫、门将）；主教练也保存为一条人员记录，`attr` 为“主教练”。未来实现在线名单请求后，每次请求成功也要走同一同步流程，转会或更名才会反映到数据库。当前附带的是一份历史响应样本，导入它只会把数据库更新到该样本记录的名单状态，不代表懂球帝当前名单。
+`roster-import` 使用 `--database` 指定已初始化的数据库，并读取本地 JSON 响应文件，不会访问懂球帝；导入前会确认球队已存在于 SQLite。已有数据库先运行 `db-init`，它会迁移 `players` 表并添加新列。名单导入会校验人员 ID、姓名、年龄、球员的球衣号码、英文名、身价及 `attr`，在同一事务中刷新 `players` 人员资料并替换指定球队的 `team_players` 关联。接口字段 `shirtnumber` 写入 `players.shirt_number`，`person_en_name` 写入同名列；`age` 原样写入 `players.age`（如“26岁”），球员 `statistic` 中的“身价(欧)”原样写入 `players.social_status`（如“2.2亿”），主教练身价为 `NULL`；教练记录没有球衣号码和英文名这两个球员字段，数据库中保留为 `NULL`。`players.attr` 保存球员位置（前锋、中场、后卫、门将）；主教练也保存为一条人员记录，`attr` 为“主教练”。在线 `roster-sync` 复用同一名单同步流程，并继续抓取球员本赛季联赛统计、当前能力值、场上位置，以及个人资料中的国籍、身高和体重。当前附带的是一份历史响应样本，导入它只会把数据库更新到该样本记录的名单状态，不代表懂球帝当前名单。
 
 `schedule-import` 读取本地赛程响应文件，不会访问懂球帝。它要求 `season_list` 中恰有一个 `current=true` 的赛季，并校验其 `sort` 最大；命令还要求提供该响应对应的 `--request-url`，校验 URL 中的球队 ID 和 `season` 与响应当前赛季一致。`data` 中每场比赛都必须包含目标球队；同一 `match_id` 的完全相同记录会合并，字段冲突会报错。入库前会把 A/B 字段清洗成下划线命名；每队仅保留 `league_seasons` 所指向的当前赛季赛程。导入更高 `season_sort` 的新赛季时，会清掉该联赛所有球队的旧赛季赛程，然后保存当前球队的新赛程。`schedule-report` 从 SQLite 读取赛程，并按所选球队视角输出对手、比分、点球、比赛标题和状态；空字段按接口原样保留，不推断主客场。
 
 `schedule-import`、`schedule-report` 和 `daily-report` 使用 `--database` 指向 SQLite；球队名称和联赛编号都从 `teams` 表读取，不再从 `config.toml` 重复读取。`daily-report` 从 `team_schedules` 表读取所选球队当前赛季赛程。懂球帝的 `start_play` 按 UTC 保存，数据库不改写；生成日报时转换为 UTC+8，再按本地日期筛选一个自然月：开始日期包含在内，下一月对应日期不包含在内。默认使用上海时区当天日期；传入 `--as-of YYYY-MM-DD` 可以复现指定日期的日报。请从项目根目录运行命令，Markdown 文件会写到 `out/<日期>.md`，重复生成同一日期会更新该文件。
+
+`roster-sync` 先请求 `member_v2/{team_id}?app=dqd`，保存球衣号码和人员资料。然后对每名球员先请求 `statistic_new/{person_id}?lang=zh-cn`，立即接着请求 `player_ability/{person_id}?player_type=`，完成后等待 1 秒再处理下一人；24 名球员共请求 24 次统计和 24 次能力接口，主教练跳过。
+
+当前赛季从球队所属联赛的 `league_seasons.season` 读取；统计只处理 `league` 中赛季名称、`competition.short_name` 与数据库球队联赛名称都匹配的记录，同赛季同联赛转会的多条记录累加。`base_info.appearances`、`starts`、`goals`、`assists` 分别写入 `players.caps`、`lineups`、`goals`、`assists`；门将额外将 `statistic.saves` 写入 `rescues`。没有本赛季联赛记录时保存 `NULL`，不补零；联赛统计请求失败或字段无效时停止本次批次。
+
+能力值解析参考 `cup-analyzer/crawler-server/crawlers/playerListCrawler.js` 的 `getAbilityPosition`：只比较 `data.fields` 中 `lv` 以 `_f` 结尾的项目，取最大 `val` 写入 `players.ability`，同分取接口第一项；位置名称通过共享的 `src/dqd_scroll/shared/positionMap.json` 映射为代码后写入 `players.position`。所有 Python 脚本可通过 `from dqd_scroll.shared import load_position_map` 读取同一份映射，JSON 随 Python 包一起安装。单名球员能力缺失、请求失败或解析失败时，仅记录 `INFO`，将 `ability` 和 `position` 记为 `NULL`，继续下一人。
+
+能力接口没有赛季查询参数或赛季字段，保存的是当前能力快照，与本次数据库当前赛季共同记录在 `stats_season`、`stats_league_serial` 下，不推断历史赛季能力。整批球员处理后一次提交；赛程导入切换联赛赛季时，会清除该联赛的旧统计、能力值和位置。已有数据库先运行 `db-init` 迁移，再执行 `roster-sync`。
 
 日报每行依次显示 UTC+8 开球时间、星期、赛事、轮次、对阵和距上一场开球的间隔。轮次读取 `round_name`，该字段为空时从比赛标题中提取；文本已有“第”时原样显示，没有“第”但含阶段文本和数字 `gameweek` 时，组合为“阶段 第x轮”。没有阶段文本时保留 `gameweek` 原值。对阵按“对手vs所选球队”显示。间隔根据 SQLite 中该球队按开球时间排序的全部当前赛季比赛计算，首场比赛没有上一场时留空；间隔以小时显示。
 
@@ -201,7 +211,7 @@ python -m dqd_scroll dynamics-report --config config.toml --since 2026-10-24T11:
 1. 在授权设备上通过懂球帝 APP 正常打开球队赛程和名单，抓取对应原始请求信息并记录 APP 版本、请求方法、HTTP 状态、请求头名称和认证依赖。
 2. 把赛程 URL、名单样本和真实请求证据补进 [接口契约记录](docs/api-contract.md)，确认哪些请求头或登录态确实必要。
 3. 对名单、赛程等尚未核验的接口，先确认请求契约，再实现对应只读 API 方法。
-4. 曼城动态日报由 Windows 任务计划程序或 macOS DSH 插件定时器按配置时间启动；名单、赛程在线流程仍待核验后接入。
+4. 曼城动态日报由 Windows 任务计划程序或 macOS DSH 插件定时器按配置时间启动；名单及球员统计可手动运行 `roster-sync`；赛程在线请求仍待核验。
 
 名单和赛程的旧 Postman URL、响应内的 `season_list[].url` 都不能单独证明请求头、认证要求或调用授权。曼城动态的 Windows/macOS 定时入口已实现；其他数据功能通过项目自己的 Python 命令和脚本提供，不使用 MCP。
 
@@ -225,6 +235,7 @@ src/dqd_scroll/
   lib/
     __init__.py             名单和赛程数据加工逻辑
     team_roster.py          校验、筛选、清洗并去重球队名单响应
+    player_statistics.py    按数据库赛季和联赛筛选球员统计
     team_schedule.py        选择当前赛季、清洗去重并加工球队视角赛程
     report.py               筛选一个自然月的赛程并加工生成 Markdown 日报
     team_dynamics.py        校验动态字段并按用户兴趣词筛选
@@ -247,4 +258,23 @@ prompts/
   duty.md                   后续的内容筛选与摘要口径
 ```
 
-数据流按职责分层：`api` 负责发请求并返回原始响应；`src/dqd_scroll/lib` 是名单、赛程和动态的校验、筛选及加工逻辑位置；`repository` 负责 SQLite 查询和写入；`workflow` 负责把这些步骤串起来。动态日报流程不调用 `repository`，动态只在内存中生成全部动态与兴趣命中两种报告。根目录的 `index.js` 负责设置页和跨平台每日调度注册；Windows 使用任务计划程序，macOS 使用插件定时器。定时入口可直接运行 Python CLI，或启动 DSH headless 模型会话。插件不重复实现 Python 业务逻辑。`tools/` 只放没有现成 CLI 入口的独立开发或维护脚本。名单按 `person_id` 去重、赛程按 `match_id` 去重，动态按本次运行的 `id` 去重；重复内容冲突时会报错。曼城动态 API 和 Windows/macOS 定时入口已实现；名单、赛程及球员信息等其他实时接口仍未实现。
+数据流按职责分层：`api` 负责发请求并返回原始响应；`src/dqd_scroll/lib` 是名单、赛程和动态的校验、筛选及加工逻辑位置；`repository` 负责 SQLite 查询和写入；`workflow` 负责把这些步骤串起来。动态日报流程不调用 `repository`，动态只在内存中生成全部动态与兴趣命中两种报告。根目录的 `index.js` 负责设置页和跨平台每日调度注册；Windows 使用任务计划程序，macOS 使用插件定时器。定时入口可直接运行 Python CLI，或启动 DSH headless 模型会话。插件不重复实现 Python 业务逻辑。`tools/` 只放没有现成 CLI 入口的独立开发或维护脚本。名单按 `person_id` 去重、赛程按 `match_id` 去重，动态按本次运行的 `id` 去重；重复内容冲突时会报错。曼城动态 API、在线名单及球员本赛季联赛统计和 Windows/macOS 定时入口已实现；赛程及其他球员资料实时接口尚未实现。
+
+## 国内联赛出场分析（首版：英超）
+
+先使用 Python 3.11+ 安装项目依赖，初始化数据库、导入当前赛季赛程，再执行：
+
+```powershell
+python -m dqd_scroll roster-sync --database data/dqd_scroll.sqlite3 --team-id 50000529
+python -m dqd_scroll club-analyze --database data/dqd_scroll.sqlite3 --team-id 50000529
+# 仅分析第 8 轮之前的已完赛英超比赛。
+python -m dqd_scroll club-analyze --database data/dqd_scroll.sqlite3 --team-id 50000529 --before-round 8
+```
+
+`roster-sync` 每名球员依次请求统计、能力值、个人资料，同一球员请求之间不主动等待，球员之间等待 1 秒。个人资料的 `base_info.nationality`、`height`、`weight` 写入 `players.nationality`、`height`、`weight`，后两项单位分别为厘米和公斤；主教练不请求这些资料。资料与统计、能力值一起提交，资料失败时不提交部分详情。能力值不可用仍记录 INFO、保存 NULL 并继续。`roster-import` 不清空已有个人资料。
+
+`club-analyze` 独立请求球探英超赛程和逐场技术统计，不依赖旧项目或 Node。它从 SQLite 读取球队的球探编号及当前赛季，只分析已完赛英超；`--before-round` 为不包含该轮的上界。其他联赛需要先增加明确的采集配置。
+
+报告中的比赛累计统计按本次选定范围重新计算，不覆盖 `players` 中懂球帝的整季统计。关联范围是当前名单，按唯一球衣号匹配；未匹配的上场人员会在报告列出并排除，不进行模糊姓名匹配。号码与姓名存在历史变化时应检查该关联口径。位置次数来自首发阵型，能力值接口的 `position` 不参与累计；未知阵型不自动套用 442，位置数据不足时不生成完整推荐首发。
+
+终端正文与 Markdown 内容一致。默认报告为 `out/club-analysis/2026-2027/曼城/all.md`，指定截止轮次时文件为 `before-round-N.md`；`--output-dir` 可更换输出根目录。球探请求串行、间隔 1 秒；单场失败最多重试三次，等待 1、2、4 秒。存在失败比赛时命令返回非零、列出失败编号，并保留已有成功报告；没有符合条件的比赛时不生成报告。全部成功后原子替换报告。

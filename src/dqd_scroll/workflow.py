@@ -1,14 +1,61 @@
 from __future__ import annotations;
 
 from datetime import datetime;
+from time import sleep;
+import logging;
 
-from .api.dqd_api import fetch_team_dynamics;
+from .api.dqd_api import fetch_player_ability, fetch_player_profile, fetch_player_statistics, fetch_team_dynamics, fetch_team_roster;
+from .lib.player_profile import parse_player_profile;
 from .lib.dynamics_report import format_all_team_dynamics_report, format_team_dynamics_report;
 from .lib.team_dynamics import select_interesting_dynamics;
 from .lib.team_roster import parse_team_roster;
+from .lib.player_statistics import parse_player_statistics;
+from .lib.player_ability import parse_player_ability;
 from .lib.team_schedule import parse_team_schedule;
-from .models import TeamDynamicsFetch;
+from .models import PlayerAbility, TeamDynamicsFetch;
 from .repository import Repository;
+from .shared import load_position_map;
+
+
+logger = logging.getLogger(__name__);
+
+
+def sync_team_roster(repository: Repository, dqd_team_id: int) -> tuple[int, int]:
+    team = repository.get_team(dqd_team_id);
+    season = repository.get_current_season(dqd_team_id);
+    position_map = load_position_map();
+    roster = parse_team_roster(fetch_team_roster(dqd_team_id));
+    saved_count = repository.replace_team_players(dqd_team_id, roster.members);
+
+    statistics = [];
+    abilities = [];
+    profiles = [];
+    for member in roster.members:
+        if member.attr == '主教练':
+            continue;
+        # 每名球员的三个请求连续执行；上一名的资料请求结束后才开始计时。
+        if statistics:
+            sleep(1);
+        response_body = fetch_player_statistics(member.person_id);
+        statistics.append(parse_player_statistics(
+            response_body,
+            member.person_id,
+            season,
+            team.match_league_name,
+            member.attr == '门将',
+        ));
+        try:
+            ability = parse_player_ability(fetch_player_ability(member.person_id), member.person_id, position_map);
+        except (RuntimeError, ValueError, OSError) as error:
+            # 单个球员能力不可用时保留 NULL，继续下一人，不丢弃已取得的联赛统计。
+            logger.info('person_id=%s 能力数据不可用，ability/position 写入 NULL，继续下一名球员：%s', member.person_id, error);
+            ability = PlayerAbility(member.person_id, None, None);
+        abilities.append(ability);
+        profiles.append(parse_player_profile(fetch_player_profile(member.person_id), member.person_id));
+
+    # 全部球员处理结束后一起提交；无能力数据的球员保留 NULL。
+    repository.replace_team_player_details(dqd_team_id, season, statistics, abilities, profiles);
+    return saved_count, len(statistics);
 
 
 def save_team_roster_response(

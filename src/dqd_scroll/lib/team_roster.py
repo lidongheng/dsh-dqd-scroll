@@ -90,6 +90,10 @@ def parse_team_roster(response_body: object) -> TeamRoster:
                     f'data.list[{group_index}].data[{member_index}].person_name 必须是非空字符串。'
                 );
 
+            age = member.get('age');
+            if not isinstance(age, str) or not age.strip():
+                raise ValueError(f'data.list[{group_index}].data[{member_index}].age 必须是非空字符串。');
+
             if group_type in PLAYER_GROUP_TYPES:
                 shirt_number = member.get('shirtnumber');
                 if not isinstance(shirt_number, str):
@@ -101,10 +105,19 @@ def parse_team_roster(response_body: object) -> TeamRoster:
                     raise ValueError(
                         f'data.list[{group_index}].data[{member_index}].person_en_name 必须是字符串。'
                     );
+                statistics = member.get('statistic');
+                if not isinstance(statistics, list) or not all(isinstance(item, dict) for item in statistics):
+                    raise ValueError(f'data.list[{group_index}].data[{member_index}].statistic 必须是对象数组。');
+                # 身价在 statistic 数组中按中文键定位，不依赖它在数组里的顺序。
+                market_values = [item['身价(欧)'] for item in statistics if '身价(欧)' in item];
+                if len(market_values) != 1 or not isinstance(market_values[0], str):
+                    raise ValueError(f'person_id={person_id} 必须包含唯一的字符串“身价(欧)”统计。');
+                social_status = market_values[0];
             else:
                 # 当前名单响应的主教练记录没有球衣号码或英文名。
                 shirt_number = None;
                 person_en_name = None;
+                social_status = None;
 
             roster_member = RosterMember(
                 person_id=person_id,
@@ -112,6 +125,8 @@ def parse_team_roster(response_body: object) -> TeamRoster:
                 attr=attr,
                 shirt_number=shirt_number,
                 person_en_name=person_en_name,
+                age=age,
+                social_status=social_status,
             );
             existing_member = roster_members_by_id.get(person_id);
             if existing_member is not None:

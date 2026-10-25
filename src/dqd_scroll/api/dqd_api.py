@@ -5,6 +5,15 @@ from urllib.parse import parse_qs, urlencode, urlsplit;
 from zoneinfo import ZoneInfo;
 
 from .client import get_json;
+from .config import (
+    DQD_ABILITY_REFERER,
+    DQD_APP_HEADERS,
+    DQD_DYNAMICS_REFERER,
+    DQD_PROFILE_REFERER,
+    DQD_ROSTER_REFERER,
+    DQD_SPORT_HEADERS,
+    DQD_STATISTICS_REFERER,
+);
 from ..lib.team_dynamics import parse_team_dynamic;
 from ..models import TeamDynamic, TeamDynamicsFetch;
 
@@ -12,6 +21,38 @@ from ..models import TeamDynamic, TeamDynamicsFetch;
 DYNAMICS_ENDPOINT = 'https://api.dongqiudi.com/v3/archive/app/channel/feeds';
 MAX_DYNAMICS_PAGES = 50;
 REQUEST_TIMEOUT_SECONDS = 30;
+
+
+def fetch_team_roster(team_id: int) -> object:
+    return get_json(
+        f'https://sport-data.dongqiudi.com/soccer/biz/dqd/v1/team/member_v2/{team_id}?app=dqd',
+        REQUEST_TIMEOUT_SECONDS,
+        {**DQD_SPORT_HEADERS, 'Referer': DQD_ROSTER_REFERER.format(team_id=team_id)},
+    );
+
+
+def fetch_player_statistics(person_id: int) -> object:
+    return get_json(
+        f'https://sport-data.dongqiudi.com/soccer/biz/dqd/person/statistic_new/{person_id}?lang=zh-cn',
+        REQUEST_TIMEOUT_SECONDS,
+        {**DQD_SPORT_HEADERS, 'Referer': DQD_STATISTICS_REFERER.format(person_id=person_id)},
+    );
+
+
+def fetch_player_ability(person_id: int) -> object:
+    return get_json(
+        f'https://sport-data.dongqiudi.com/soccer/data/sofifa/v1/player_ability/{person_id}?player_type=',
+        REQUEST_TIMEOUT_SECONDS,
+        {**DQD_SPORT_HEADERS, 'Referer': DQD_ABILITY_REFERER},
+    );
+
+
+def fetch_player_profile(person_id: int) -> object:
+    return get_json(
+        f'https://api.dongqiudi.com/data/v1/detail/person/{person_id}?app=dqd&lang=zh-cn',
+        REQUEST_TIMEOUT_SECONDS,
+        {**DQD_APP_HEADERS, 'Referer': DQD_PROFILE_REFERER},
+    );
 
 
 def fetch_team_dynamics(team_id: int, since: datetime, until: datetime) -> TeamDynamicsFetch:
@@ -28,7 +69,11 @@ def fetch_team_dynamics(team_id: int, since: datetime, until: datetime) -> TeamD
             raise ValueError(f'动态分页 next URL 重复，已停止以防无限循环: {current_url}');
         seen_urls.add(current_url);
         _validate_page_url(current_url, team_id);
-        response_body = get_json(current_url, REQUEST_TIMEOUT_SECONDS);
+        response_body = get_json(
+            current_url,
+            REQUEST_TIMEOUT_SECONDS,
+            {**DQD_APP_HEADERS, 'Referer': DQD_DYNAMICS_REFERER},
+        );
         page_data = _parse_page_response(response_body);
         page_count += 1;
 

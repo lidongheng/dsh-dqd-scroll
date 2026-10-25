@@ -1,0 +1,450 @@
+{
+  "formations": {
+    "4213": [
+      "GK",
+      "LB",
+      "CB",
+      "CB",
+      "RB",
+      "CDM",
+      "CDM",
+      "CAM",
+      "LW",
+      "ST",
+      "RW"
+    ],
+    "4231": [
+      "GK",
+      "LB",
+      "CB",
+      "CB",
+      "RB",
+      "CDM",
+      "CDM",
+      "LM",
+      "CAM",
+      "RM",
+      "ST"
+    ],
+    "3421": [
+      "GK",
+      "LCB",
+      "CB",
+      "RCB",
+      "LB",
+      "CDM",
+      "CDM",
+      "RB",
+      "LM",
+      "RM",
+      "ST"
+    ],
+    "433": [
+      "GK",
+      "LB",
+      "CB",
+      "CB",
+      "RB",
+      "LDM",
+      "CDM",
+      "RDM",
+      "LW",
+      "ST",
+      "RW"
+    ],
+    "352": [
+      "GK",
+      "LCB",
+      "CB",
+      "RCB",
+      "LB",
+      "CM",
+      "CDM",
+      "CM",
+      "RB",
+      "ST",
+      "ST"
+    ],
+    "343": [
+      "GK",
+      "LCB",
+      "CB",
+      "RCB",
+      "LB",
+      "CDM",
+      "CDM",
+      "RB",
+      "LW",
+      "ST",
+      "RW"
+    ],
+    "442": [
+      "GK",
+      "LB",
+      "CB",
+      "CB",
+      "RB",
+      "LM",
+      "CDM",
+      "CDM",
+      "RM",
+      "ST",
+      "ST"
+    ],
+    "3322": [
+      "GK",
+      "LCB",
+      "CB",
+      "RCB",
+      "CDM",
+      "CDM",
+      "CDM",
+      "LM",
+      "RM",
+      "ST",
+      "ST"
+    ],
+    "541": [
+      "GK",
+      "LB",
+      "LCB",
+      "CB",
+      "RCB",
+      "RB",
+      "LM",
+      "CDM",
+      "CDM",
+      "RM",
+      "ST"
+    ],
+    "4132": [
+      "GK",
+      "LB",
+      "LCB",
+      "CB",
+      "RCB",
+      "CDM",
+      "LM",
+      "CAM",
+      "RM",
+      "ST",
+      "ST"
+    ],
+    "4123": [
+      "GK",
+      "LB",
+      "LCB",
+      "CB",
+      "RCB",
+      "CDM",
+      "LM",
+      "RM",
+      "LW",
+      "ST",
+      "RW"
+    ],
+    "451": [
+      "GK",
+      "LB",
+      "LCB",
+      "CB",
+      "RCB",
+      "LM",
+      "CM",
+      "CDM",
+      "CM",
+      "RM",
+      "ST"
+    ],
+    "3412": [
+      "GK",
+      "LCB",
+      "CB",
+      "RCB",
+      "LB",
+      "CDM",
+      "CDM",
+      "RB",
+      "CAM",
+      "ST",
+      "ST"
+    ],
+    "532": [
+      "GK",
+      "LB",
+      "LCB",
+      "CB",
+      "RCB",
+      "RB",
+      "LM",
+      "CDM",
+      "RM",
+      "ST",
+      "ST"
+    ],
+    "4411": [
+      "GK",
+      "LB",
+      "CB",
+      "CB",
+      "RB",
+      "LM",
+      "CDM",
+      "CDM",
+      "RM",
+      "CF",
+      "ST"
+    ],
+    "4141": [
+      "GK",
+      "LB",
+      "CB",
+      "CB",
+      "RB",
+      "CDM",
+      "LM",
+      "CAM",
+      "CAM",
+      "RM",
+      "ST"
+    ],
+    "3142": [
+      "GK",
+      "LCB",
+      "CB",
+      "RCB",
+      "CDM",
+      "LM",
+      "CAM",
+      "CAM",
+      "RM",
+      "ST",
+      "ST"
+    ],
+    "4312": [
+      "GK",
+      "LB",
+      "CB",
+      "CB",
+      "RB",
+      "LM",
+      "CDM",
+      "RM",
+      "CAM",
+      "ST",
+      "ST"
+    ],
+    "3511": [
+      "GK",
+      "LCB",
+      "CB",
+      "RCB",
+      "LB",
+      "CM",
+      "CDM",
+      "CM",
+      "RB",
+      "CF",
+      "ST"
+    ],
+    "4321": [
+      "GK",
+      "LB",
+      "CB",
+      "CB",
+      "RB",
+      "LM",
+      "CDM",
+      "RM",
+      "LW",
+      "RW",
+      "ST"
+    ],
+    "3241": [
+      "GK",
+      "LCB",
+      "CB",
+      "RCB",
+      "CDM",
+      "CDM",
+      "LM",
+      "CM",
+      "CM",
+      "RM",
+      "ST"
+    ],
+    "3313": [
+      "GK",
+      "LCB",
+      "CB",
+      "RCB",
+      "LM",
+      "CDM",
+      "RM",
+      "CAM",
+      "LW",
+      "ST",
+      "RW"
+    ]
+  },
+  "groups": {
+    "GK": [
+      "GK"
+    ],
+    "DF": [
+      "CB",
+      "LB",
+      "RB",
+      "LCB",
+      "RCB",
+      "LWB",
+      "RWB"
+    ],
+    "MF": [
+      "CDM",
+      "CM",
+      "LM",
+      "RM",
+      "CAM",
+      "LDM",
+      "RDM",
+      "LCM",
+      "RCM",
+      "LAM",
+      "RAM"
+    ],
+    "FW": [
+      "CF",
+      "ST",
+      "LW",
+      "RW"
+    ]
+  },
+  "compatibility": {
+    "GK": [
+      "GK"
+    ],
+    "CB": [
+      "CB",
+      "LCB",
+      "RCB"
+    ],
+    "LB": [
+      "LB",
+      "LWB"
+    ],
+    "RB": [
+      "RB",
+      "RWB"
+    ],
+    "CDM": [
+      "CDM",
+      "CM",
+      "LDM",
+      "RDM"
+    ],
+    "CM": [
+      "CM",
+      "CDM",
+      "CAM",
+      "LCM",
+      "RCM"
+    ],
+    "CAM": [
+      "CAM",
+      "CM",
+      "CF",
+      "LAM",
+      "RAM"
+    ],
+    "LM": [
+      "LM",
+      "LW",
+      "LWB",
+      "LAM"
+    ],
+    "RM": [
+      "RM",
+      "RW",
+      "RWB",
+      "RAM"
+    ],
+    "ST": [
+      "ST",
+      "CF",
+      "LW",
+      "RW"
+    ],
+    "CF": [
+      "CF",
+      "ST",
+      "CAM"
+    ],
+    "LW": [
+      "LW",
+      "LM",
+      "ST",
+      "CF"
+    ],
+    "RW": [
+      "RW",
+      "RM",
+      "ST",
+      "CF"
+    ],
+    "LWB": [
+      "LWB",
+      "LB",
+      "LM"
+    ],
+    "RWB": [
+      "RWB",
+      "RB",
+      "RM"
+    ],
+    "LCB": [
+      "LCB",
+      "CB",
+      "LB"
+    ],
+    "RCB": [
+      "RCB",
+      "CB",
+      "RB"
+    ],
+    "LDM": [
+      "LDM",
+      "CDM",
+      "LCM"
+    ],
+    "RDM": [
+      "RDM",
+      "CDM",
+      "RCM"
+    ],
+    "LCM": [
+      "LCM",
+      "CM",
+      "LDM",
+      "LAM"
+    ],
+    "RCM": [
+      "RCM",
+      "CM",
+      "RDM",
+      "RAM"
+    ],
+    "LAM": [
+      "LAM",
+      "CAM",
+      "LCM",
+      "LW"
+    ],
+    "RAM": [
+      "RAM",
+      "CAM",
+      "RCM",
+      "RW"
+    ]
+  }
+}

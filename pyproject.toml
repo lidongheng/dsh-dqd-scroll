@@ -8,10 +8,13 @@ version = "0.3.0"
 description = "懂球帝只读阅读助手的 Python 后端与命令行脚本。"
 readme = "README.md"
 requires-python = ">=3.11"
-dependencies = ["tzdata"]
+dependencies = ["tzdata", "json5", "beautifulsoup4"]
 
 [project.scripts]
 dqd-scroll = "dqd_scroll.cli:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]
+
+[tool.setuptools.package-data]
+'dqd_scroll.shared' = ['positionMap.json', 'clubLineup.json']

@@ -8,7 +8,8 @@
           {
             "person_id": "50002854",
             "type": "主教练",
-            "person_name": "马雷斯卡"
+            "person_name": "马雷斯卡",
+            "age": "46岁"
           },
           {
             "person_id": "50014330",
@@ -91,42 +92,78 @@
             "type": "attacker",
             "person_name": "哈兰德",
             "shirtnumber": "9",
-            "person_en_name": "Erling Haaland"
+            "person_en_name": "Erling Haaland",
+            "age": "26岁",
+            "statistic": [
+              {
+                "身价(欧)": "2.2亿"
+              }
+            ]
           },
           {
             "person_id": "50436685",
             "type": "attacker",
             "person_name": "塞门约",
             "shirtnumber": "42",
-            "person_en_name": "Antoine Semenyo"
+            "person_en_name": "Antoine Semenyo",
+            "age": "26岁",
+            "statistic": [
+              {
+                "身价(欧)": "8000万"
+              }
+            ]
           },
           {
             "person_id": "50472243",
             "type": "attacker",
             "person_name": "多库",
             "shirtnumber": "11",
-            "person_en_name": "Jérémy Doku"
+            "person_en_name": "Jérémy Doku",
+            "age": "24岁",
+            "statistic": [
+              {
+                "身价(欧)": "7500万"
+              }
+            ]
           },
           {
             "person_id": "50971800",
             "type": "attacker",
             "person_name": "瑞安-麦卡杜",
             "shirtnumber": "56",
-            "person_en_name": "Ryan McAidoo"
+            "person_en_name": "Ryan McAidoo",
+            "age": "18岁",
+            "statistic": [
+              {
+                "身价(欧)": "800万"
+              }
+            ]
           },
           {
             "person_id": "50853376",
             "type": "attacker",
             "person_name": "阿兰",
             "shirtnumber": "37",
-            "person_en_name": "Allan"
+            "person_en_name": "Allan",
+            "age": "22岁",
+            "statistic": [
+              {
+                "身价(欧)": "3000万"
+              }
+            ]
           },
           {
             "person_id": "50471785",
             "type": "attacker",
             "person_name": "恩迪亚耶",
             "shirtnumber": "7",
-            "person_en_name": "Iliman Ndiaye"
+            "person_en_name": "Iliman Ndiaye",
+            "age": "26岁",
+            "statistic": [
+              {
+                "身价(欧)": "6500万"
+              }
+            ]
           }
         ],
         "show_type": 1,
@@ -146,42 +183,78 @@
             "type": "midfielder",
             "person_name": "谢尔基",
             "shirtnumber": "10",
-            "person_en_name": "Rayan Cherki"
+            "person_en_name": "Rayan Cherki",
+            "age": "23岁",
+            "statistic": [
+              {
+                "身价(欧)": "1.1亿"
+              }
+            ]
           },
           {
             "person_id": "50267167",
             "type": "midfielder",
             "person_name": "福登",
             "shirtnumber": "47",
-            "person_en_name": "Phil Foden"
+            "person_en_name": "Phil Foden",
+            "age": "26岁",
+            "statistic": [
+              {
+                "身价(欧)": "6500万"
+              }
+            ]
           },
           {
             "person_id": "50245370",
             "type": "midfielder",
             "person_name": "埃利奥特-安德森",
             "shirtnumber": "5",
-            "person_en_name": "Elliot Anderson"
+            "person_en_name": "Elliot Anderson",
+            "age": "23岁",
+            "statistic": [
+              {
+                "身价(欧)": "1.2亿"
+              }
+            ]
           },
           {
             "person_id": "50486059",
             "type": "midfielder",
             "person_name": "恩佐-费尔南德斯",
             "shirtnumber": "17",
-            "person_en_name": "Enzo Fernández"
+            "person_en_name": "Enzo Fernández",
+            "age": "25岁",
+            "statistic": [
+              {
+                "身价(欧)": "1.2亿"
+              }
+            ]
           },
           {
             "person_id": "50922131",
             "type": "midfielder",
             "person_name": "布阿迪",
             "shirtnumber": "32",
-            "person_en_name": "Ayyoub Bouaddi"
+            "person_en_name": "Ayyoub Bouaddi",
+            "age": "19岁",
+            "statistic": [
+              {
+                "身价(欧)": "9000万"
+              }
+            ]
           },
           {
             "person_id": "50102192",
             "type": "midfielder",
             "person_name": "科瓦契奇",
             "shirtnumber": "8",
-            "person_en_name": "Mateo Kovacic"
+            "person_en_name": "Mateo Kovacic",
+            "age": "32岁",
+            "statistic": [
+              {
+                "身价(欧)": "1000万"
+              }
+            ]
           }
         ],
         "show_type": 1,
@@ -201,63 +274,117 @@
             "type": "defender",
             "person_name": "格瓦迪奥尔",
             "shirtnumber": "24",
-            "person_en_name": "Josko Gvardiol"
+            "person_en_name": "Josko Gvardiol",
+            "age": "24岁",
+            "statistic": [
+              {
+                "身价(欧)": "7500万"
+              }
+            ]
           },
           {
             "person_id": "50402406",
             "type": "defender",
             "person_name": "格伊",
             "shirtnumber": "6",
-            "person_en_name": "Marc Guéhi"
+            "person_en_name": "Marc Guéhi",
+            "age": "26岁",
+            "statistic": [
+              {
+                "身价(欧)": "7500万"
+              }
+            ]
           },
           {
             "person_id": "50443847",
             "type": "defender",
             "person_name": "艾特-努里",
             "shirtnumber": "21",
-            "person_en_name": "Rayan Aït-Nouri"
+            "person_en_name": "Rayan Aït-Nouri",
+            "age": "25岁",
+            "statistic": [
+              {
+                "身价(欧)": "3500万"
+              }
+            ]
           },
           {
             "person_id": "50555737",
             "type": "defender",
             "person_name": "里科-刘易斯",
             "shirtnumber": "82",
-            "person_en_name": "Rico Lewis"
+            "person_en_name": "Rico Lewis",
+            "age": "21岁",
+            "statistic": [
+              {
+                "身价(欧)": "2500万"
+              }
+            ]
           },
           {
             "person_id": "50665740",
             "type": "defender",
             "person_name": "奥赖利",
             "shirtnumber": "33",
-            "person_en_name": "Nico O'Reilly"
+            "person_en_name": "Nico O'Reilly",
+            "age": "21岁",
+            "statistic": [
+              {
+                "身价(欧)": "7000万"
+              }
+            ]
           },
           {
             "person_id": "50185896",
             "type": "defender",
             "person_name": "鲁本-迪亚斯",
             "shirtnumber": "3",
-            "person_en_name": "Rúben Dias"
+            "person_en_name": "Rúben Dias",
+            "age": "29岁",
+            "statistic": [
+              {
+                "身价(欧)": "5000万"
+              }
+            ]
           },
           {
             "person_id": "50761937",
             "type": "defender",
             "person_name": "胡桑诺夫",
             "shirtnumber": "45",
-            "person_en_name": "Abdukodir Khusanov"
+            "person_en_name": "Abdukodir Khusanov",
+            "age": "22岁",
+            "statistic": [
+              {
+                "身价(欧)": "5000万"
+              }
+            ]
           },
           {
             "person_id": "50460407",
             "type": "defender",
             "person_name": "努内斯",
             "shirtnumber": "27",
-            "person_en_name": "Matheus Nunes"
+            "person_en_name": "Matheus Nunes",
+            "age": "28岁",
+            "statistic": [
+              {
+                "身价(欧)": "4500万"
+              }
+            ]
           },
           {
             "person_id": "50924280",
             "type": "defender",
             "person_name": "维托尔-雷斯",
             "shirtnumber": "22",
-            "person_en_name": "Vitor Reis"
+            "person_en_name": "Vitor Reis",
+            "age": "20岁",
+            "statistic": [
+              {
+                "身价(欧)": "3000万"
+              }
+            ]
           }
         ],
         "show_type": 1,
@@ -277,21 +404,39 @@
             "type": "goalkeeper",
             "person_name": "多纳鲁马",
             "shirtnumber": "1",
-            "person_en_name": "Gianluigi Donnarumma"
+            "person_en_name": "Gianluigi Donnarumma",
+            "age": "27岁",
+            "statistic": [
+              {
+                "身价(欧)": "4500万"
+              }
+            ]
           },
           {
             "person_id": "50099754",
             "type": "goalkeeper",
             "person_name": "鲁利",
             "shirtnumber": "28",
-            "person_en_name": "Gerónimo Rulli"
+            "person_en_name": "Gerónimo Rulli",
+            "age": "34岁",
+            "statistic": [
+              {
+                "身价(欧)": "500万"
+              }
+            ]
           },
           {
             "person_id": "50124345",
             "type": "goalkeeper",
             "person_name": "贝蒂内利",
             "shirtnumber": "13",
-            "person_en_name": "Marcus Bettinelli"
+            "person_en_name": "Marcus Bettinelli",
+            "age": "34岁",
+            "statistic": [
+              {
+                "身价(欧)": "30万"
+              }
+            ]
           }
         ],
         "show_type": 1,

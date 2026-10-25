@@ -27,12 +27,42 @@ class RosterMember:
     # 接口字段 shirtnumber 映射到数据库列 shirt_number；教练响应不包含这两个球员字段。
     shirt_number: str | None;
     person_en_name: str | None;
+    # 年龄、身价保留接口原始文本及单位；主教练没有身价数据。
+    age: str;
+    social_status: str | None;
 
 
 @dataclass(frozen=True)
 class TeamRoster:
     # 保存四种球员位置和一名主教练；教练组其他人员不会进入球队名单。
     members: tuple[RosterMember, ...];
+
+
+@dataclass(frozen=True)
+class PlayerStatistics:
+    # 未发布本赛季联赛记录时保留 NULL；非门将不保存扑救数。
+    person_id: int;
+    caps: int | None;
+    lineups: int | None;
+    goals: int | None;
+    assists: int | None;
+    rescues: int | None;
+
+
+@dataclass(frozen=True)
+class PlayerAbility:
+    # 单名球员能力不可用时，两项一起保存为 NULL。
+    person_id: int;
+    ability: int | None;
+    position: str | None;
+
+
+@dataclass(frozen=True)
+class PlayerProfile:
+    person_id: int;
+    nationality: str;
+    height: int;
+    weight: int;
 
 
 @dataclass(frozen=True)
