@@ -35,12 +35,6 @@ window.__ModuleLoader__.load({
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify({}),
     });
-    const refreshMitmCa = () => request('/tools/refresh-mitm-ca', {
-      method: 'POST',
-      headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({}),
-    });
-
     const CSS = `
 [data-dqd-page]{display:flex;flex-direction:column;gap:18px;max-width:720px;padding:4px 2px 10px;}
 [data-dqd-title]{font-size:18px;font-weight:600;margin:0;}
@@ -64,6 +58,7 @@ window.__ModuleLoader__.load({
     function Panel() {
       const [settings, setSettings] = React.useState(null);
       const [pythonEnvironment, setPythonEnvironment] = React.useState(null);
+      const [availableTeamNames, setAvailableTeamNames] = React.useState([]);
       const [dailyRunTime, setDailyRunTime] = React.useState(null);
       const [teamNamesText, setTeamNamesText] = React.useState(null);
       const [interestsText, setInterestsText] = React.useState(null);
@@ -71,7 +66,6 @@ window.__ModuleLoader__.load({
       const [message, setMessage] = React.useState('');
       const [messageTone, setMessageTone] = React.useState('');
       const [busy, setBusy] = React.useState('');
-      const [toolOutput, setToolOutput] = React.useState('');
 
       React.useEffect(() => {
         let active = true;
@@ -79,6 +73,7 @@ window.__ModuleLoader__.load({
           if (!active) return;
           setSettings(response.settings);
           setPythonEnvironment(response.pythonEnvironment);
+          setAvailableTeamNames(response.availableTeamNames);
           setDailyRunTime(response.settings.dailyRunTime);
           setTeamNamesText(response.settings.teamNames.join('\n'));
           setInterestsText(response.settings.interests.join('\n'));
@@ -133,30 +128,9 @@ window.__ModuleLoader__.load({
         }
       };
 
-      const onRefreshMitmCa = async () => {
-        const approved = window.confirm(
-          '此操作会把固定 SHA-256 的 mitmproxy CA 挂载到 LDPlayer14 的 Android 系统证书目录，模拟器重启后挂载会消失。继续吗？',
-        );
-        if (!approved) return;
-
-        setBusy('tool');
-        setToolOutput('');
-        showMessage('正在刷新模拟器 CA…', '');
-        try {
-          const response = await refreshMitmCa();
-          setToolOutput(response.output);
-          showMessage('模拟器 CA 刷新完成。', 'success');
-        } catch (error) {
-          setToolOutput(error.payload?.output || '');
-          showMessage(error.message, 'error');
-        } finally {
-          setBusy('');
-        }
-      };
-
       const onInstallPythonEnvironment = async () => {
         setBusy('python-environment');
-        showMessage('', '');
+        showMessage('正在准备 uv、Python 3.11 和本机球队数据库，请保持 DSH 运行。', '');
         try {
           const response = await installPythonEnvironment();
           setPythonEnvironment(response.pythonEnvironment);
@@ -183,14 +157,14 @@ window.__ModuleLoader__.load({
             value: dailyRunTime,
             onChange: (event) => setDailyRunTime(event.target.value),
           }),
-          h('div', { 'data-dqd-note': '' }, '按 Asia/Shanghai 时区检查。每天成功生成一次；球队名称需与项目根目录 teams.json 的 dqd_name 完全一致；关注内容留空时不会自动生成日报。'),
+          h('div', { 'data-dqd-note': '' }, `按 Asia/Shanghai 时区检查。每天成功生成一次；关注内容留空时不会自动生成日报。可选球队：${availableTeamNames.join('、')}`),
           h('label', { 'data-dqd-label': '', htmlFor: 'dqd-scroll-team-names' }, '关注球队（每行一个懂球帝球队名称）'),
           h('textarea', {
             id: 'dqd-scroll-team-names',
             'data-dqd-textarea': '',
             value: teamNamesText,
             onChange: (event) => setTeamNamesText(event.target.value),
-            placeholder: '曼城\n阿森纳',
+            placeholder: '曼城',
           }),
           h('label', { 'data-dqd-label': '', htmlFor: 'dqd-scroll-interests' }, '关注内容（每行一条）'),
           h('textarea', {
@@ -214,26 +188,17 @@ window.__ModuleLoader__.load({
         h('h1', { 'data-dqd-title': '' }, '懂球帝动态日报'),
         settingsContent,
         pythonEnvironment === null ? null : h('div', { 'data-dqd-section': '' },
-          h('h2', { 'data-dqd-section-title': '' }, '本机 Python 环境与数据初始化'),
+          h('h2', { 'data-dqd-section-title': '' }, '本机运行环境'),
           h('div', { 'data-dqd-note': '' }, pythonEnvironment.ready
             ? `Python ${pythonEnvironment.pythonVersion} 已就绪：${pythonEnvironment.pythonPath}`
-            : '尚未初始化。此操作会在本机 DSH 数据目录创建 Python 3.11+ 独立环境，并从 teams.json 初始化 SQLite 的 teams 表。'),
-          h('div', { 'data-dqd-note': '' }, '首次安装需要本机 Python 3.11+，且当前 DSH 进程可通过 python 命令启动它。每台机器分别安装；球队数据来自项目根目录 teams.json。'),
+            : '尚未初始化。首次安装会在 DSH 用户数据目录准备 uv 与 Python 3.11，并初始化球队数据库；无需预装 Python。'),
+          h('div', { 'data-dqd-note': '' }, '安装需要网络连接以取得经过 SHA-256 校验的运行环境。配置、数据库、运行状态和日报都保存在本机 DSH 用户数据目录。'),
           h('button', {
             'data-dqd-button': '',
             'data-primary': '',
             disabled: Boolean(busy),
             onClick: onInstallPythonEnvironment,
-          }, busy === 'python-environment' ? '安装和初始化中…' : '安装本机环境并初始化球队数据')),
-        h('div', { 'data-dqd-section': '' },
-          h('h2', { 'data-dqd-section-title': '' }, '维护工具'),
-          h('div', { 'data-dqd-note': '' }, '此操作要求 LDPlayer14 的 emulator-5556 在线且可用 root，并要求本机 mitmproxy CA 与脚本内固定 SHA-256 一致。'),
-          h('button', {
-            'data-dqd-button': '',
-            disabled: Boolean(busy),
-            onClick: onRefreshMitmCa,
-          }, busy === 'tool' ? '刷新中…' : '刷新 LDPlayer mitmproxy CA'),
-          toolOutput ? h('pre', { 'data-dqd-output': '' }, toolOutput) : null),
+          }, busy === 'python-environment' ? '安装和初始化中…' : '准备运行环境')),
         message ? h('div', {
           'data-dqd-message': '',
           ...(messageTone ? { [`data-${messageTone}`]: '' } : {}),

@@ -17,9 +17,9 @@ def show_status() -> int:
     return 0;
 
 
-def initialize_database(config_path: Path) -> int:
+def initialize_database(config_path: Path, team_data_path: Path | None = None) -> int:
     # CLI 从 TOML 读取数据库位置、从 JSON 读取球队映射，不在代码里猜默认值。
-    config = load_config(config_path);
+    config = load_config(config_path, team_data_path);
     repository = Repository(config.database_path);
     repository.initialize(config.teams);
     print(f'SQLite 已初始化: {config.database_path}');
@@ -107,11 +107,14 @@ def generate_dynamics_report(
     config_path: Path,
     since: datetime | None,
     until: datetime | None,
+    team_data_path: Path | None = None,
 ) -> int:
     # 默认生成上海时区当天 00:00 至当前时刻的报告；传入参数可手动选择完整时间范围。
-    config = load_config(config_path);
+    config = load_config(config_path, team_data_path);
     if config.dynamics is None:
         raise ValueError('config.toml 缺少 dynamics 配置表。');
+    if not config.dynamics.team_names:
+        raise ValueError('请先在 config.toml 的 dynamics.team_names 中配置关注球队。');
     if not config.dynamics.interests:
         raise ValueError('请先在 config.toml 的 dynamics.interests 中配置关注内容。');
     if (since is None) != (until is None):
@@ -182,7 +185,7 @@ def _repository_for_existing_database(database_path: Path) -> Repository:
 
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description='懂球帝只读阅读助手');
-    parser.add_argument('--version', action='version', version='dqd-scroll 0.1.0');
+    parser.add_argument('--version', action='version', version='dqd-scroll 0.1.1');
     subparsers = parser.add_subparsers(dest='command', required=True);
 
     status_parser = subparsers.add_parser('status', help='查看项目当前阶段');
@@ -190,6 +193,7 @@ def build_parser() -> argparse.ArgumentParser:
 
     database_parser = subparsers.add_parser('db-init', help='按配置文件初始化 SQLite');
     database_parser.add_argument('--config', type=Path, required=True, help='TOML 配置文件路径');
+    database_parser.add_argument('--teams', type=Path, help='球队映射 JSON 文件路径');
     database_parser.set_defaults(handler=initialize_database);
 
     roster_parser = subparsers.add_parser('roster-import', help='从响应文件刷新人员姓名和 attr 并替换球队名单');
@@ -234,6 +238,7 @@ def build_parser() -> argparse.ArgumentParser:
         help='读取配置球队动态并按配置兴趣生成 Markdown 日报，不写入 SQLite',
     );
     dynamics_report_parser.add_argument('--config', type=Path, required=True, help='TOML 配置文件路径');
+    dynamics_report_parser.add_argument('--teams', type=Path, help='球队映射 JSON 文件路径');
     dynamics_report_parser.add_argument(
         '--since',
         type=datetime.fromisoformat,
@@ -253,13 +258,13 @@ def main() -> int:
     if args.command == 'status':
         return args.handler();
     if args.command == 'db-init':
-        return args.handler(args.config);
+        return args.handler(args.config, args.teams);
     if args.command == 'schedule-report':
         return args.handler(args.database, args.team_id);
     if args.command == 'daily-report':
         return args.handler(args.database, args.team_id, args.as_of);
     if args.command == 'dynamics-report':
-        return args.handler(args.config, args.since, args.until);
+        return args.handler(args.config, args.since, args.until, args.teams);
     if args.command == 'schedule-import':
         return args.handler(args.database, args.team_id, args.response_file, args.request_url);
     return args.handler(args.database, args.team_id, args.response_file);
