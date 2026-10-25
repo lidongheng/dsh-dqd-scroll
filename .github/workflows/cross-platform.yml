@@ -3,8 +3,6 @@ name: Cross-platform verification
 on:
   pull_request:
   push:
-    branches:
-      - main
 
 jobs:
   verify:
@@ -27,3 +25,4 @@ jobs:
       - run: npm test
       - run: npm pack --dry-run --json
       - run: python -m compileall -q src/dqd_scroll
+
