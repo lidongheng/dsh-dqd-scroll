@@ -47,7 +47,9 @@ class Repository:
                 'CREATE TABLE IF NOT EXISTS players ('
                 'person_id INTEGER PRIMARY KEY, '
                 'person_name TEXT NOT NULL, '
-                'attr TEXT NOT NULL'
+                'attr TEXT NOT NULL, '
+                'shirt_number TEXT, '
+                'person_en_name TEXT'
                 ');'
             );
             connection.execute(
@@ -127,7 +129,7 @@ class Repository:
                         connection.execute(f'ALTER TABLE teams ADD COLUMN {new_name} {column_type};');
                     team_columns.add(new_name);
 
-            # 老数据库原来只保存球员 ID；先增加姓名列，下一次名单同步会填入最新姓名。
+            # 老版 players 表逐步增加姓名、位置、球衣号码和英文名列，保留已有人员 ID。
             player_columns = {row[1] for row in connection.execute('PRAGMA table_info(players);').fetchall()};
             if 'person_name' not in player_columns:
                 connection.execute('ALTER TABLE players ADD COLUMN person_name TEXT;');
@@ -135,6 +137,12 @@ class Repository:
             if 'attr' not in player_columns:
                 connection.execute('ALTER TABLE players ADD COLUMN attr TEXT;');
                 player_columns.add('attr');
+            if 'shirt_number' not in player_columns:
+                connection.execute('ALTER TABLE players ADD COLUMN shirt_number TEXT;');
+                player_columns.add('shirt_number');
+            if 'person_en_name' not in player_columns:
+                connection.execute('ALTER TABLE players ADD COLUMN person_en_name TEXT;');
+                player_columns.add('person_en_name');
             team_player_columns = {row[1] for row in connection.execute('PRAGMA table_info(team_players);').fetchall()};
             if 'attr' in team_player_columns:
                 # 从旧的球队关联表迁移 attr；同一人员在多个队有记录时按 team_id 顺序取一条旧值。
@@ -228,6 +236,10 @@ class Repository:
                 raise ValueError('person_name must be a non-empty string.');
             if not isinstance(member.attr, str) or not member.attr.strip():
                 raise ValueError('attr must be a non-empty string.');
+            if member.shirt_number is not None and not isinstance(member.shirt_number, str):
+                raise ValueError('shirt_number must be a string or None.');
+            if member.person_en_name is not None and not isinstance(member.person_en_name, str):
+                raise ValueError('person_en_name must be a string or None.');
             player_ids.append(member.person_id);
         if len(set(player_ids)) != len(player_ids):
             raise ValueError('members contains duplicate person_id values.');
@@ -237,11 +249,23 @@ class Repository:
             connection.execute('PRAGMA foreign_keys = ON;');
             connection.execute('BEGIN IMMEDIATE;');
             connection.executemany(
-                'INSERT INTO players (person_id, person_name, attr) VALUES (?, ?, ?) '
+                'INSERT INTO players '
+                '(person_id, person_name, attr, shirt_number, person_en_name) VALUES (?, ?, ?, ?, ?) '
                 'ON CONFLICT(person_id) DO UPDATE SET '
                 'person_name = excluded.person_name, '
-                'attr = excluded.attr;',
-                [(member.person_id, member.person_name, member.attr) for member in roster_members],
+                'attr = excluded.attr, '
+                'shirt_number = excluded.shirt_number, '
+                'person_en_name = excluded.person_en_name;',
+                [
+                    (
+                        member.person_id,
+                        member.person_name,
+                        member.attr,
+                        member.shirt_number,
+                        member.person_en_name,
+                    )
+                    for member in roster_members
+                ],
             );
             connection.execute('DELETE FROM team_players WHERE team_id = ?;', (team_id,));
             connection.executemany(

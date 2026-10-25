@@ -89,32 +89,44 @@
           {
             "person_id": "50259656",
             "type": "attacker",
-            "person_name": "哈兰德"
+            "person_name": "哈兰德",
+            "shirtnumber": "9",
+            "person_en_name": "Erling Haaland"
           },
           {
             "person_id": "50436685",
             "type": "attacker",
-            "person_name": "塞门约"
+            "person_name": "塞门约",
+            "shirtnumber": "42",
+            "person_en_name": "Antoine Semenyo"
           },
           {
             "person_id": "50472243",
             "type": "attacker",
-            "person_name": "多库"
+            "person_name": "多库",
+            "shirtnumber": "11",
+            "person_en_name": "Jérémy Doku"
           },
           {
             "person_id": "50971800",
             "type": "attacker",
-            "person_name": "瑞安-麦卡杜"
+            "person_name": "瑞安-麦卡杜",
+            "shirtnumber": "56",
+            "person_en_name": "Ryan McAidoo"
           },
           {
             "person_id": "50853376",
             "type": "attacker",
-            "person_name": "阿兰"
+            "person_name": "阿兰",
+            "shirtnumber": "37",
+            "person_en_name": "Allan"
           },
           {
             "person_id": "50471785",
             "type": "attacker",
-            "person_name": "恩迪亚耶"
+            "person_name": "恩迪亚耶",
+            "shirtnumber": "7",
+            "person_en_name": "Iliman Ndiaye"
           }
         ],
         "show_type": 1,
@@ -132,32 +144,44 @@
           {
             "person_id": "50469707",
             "type": "midfielder",
-            "person_name": "谢尔基"
+            "person_name": "谢尔基",
+            "shirtnumber": "10",
+            "person_en_name": "Rayan Cherki"
           },
           {
             "person_id": "50267167",
             "type": "midfielder",
-            "person_name": "福登"
+            "person_name": "福登",
+            "shirtnumber": "47",
+            "person_en_name": "Phil Foden"
           },
           {
             "person_id": "50245370",
             "type": "midfielder",
-            "person_name": "埃利奥特-安德森"
+            "person_name": "埃利奥特-安德森",
+            "shirtnumber": "5",
+            "person_en_name": "Elliot Anderson"
           },
           {
             "person_id": "50486059",
             "type": "midfielder",
-            "person_name": "恩佐-费尔南德斯"
+            "person_name": "恩佐-费尔南德斯",
+            "shirtnumber": "17",
+            "person_en_name": "Enzo Fernández"
           },
           {
             "person_id": "50922131",
             "type": "midfielder",
-            "person_name": "布阿迪"
+            "person_name": "布阿迪",
+            "shirtnumber": "32",
+            "person_en_name": "Ayyoub Bouaddi"
           },
           {
             "person_id": "50102192",
             "type": "midfielder",
-            "person_name": "科瓦契奇"
+            "person_name": "科瓦契奇",
+            "shirtnumber": "8",
+            "person_en_name": "Mateo Kovacic"
           }
         ],
         "show_type": 1,
@@ -175,47 +199,65 @@
           {
             "person_id": "50475427",
             "type": "defender",
-            "person_name": "格瓦迪奥尔"
+            "person_name": "格瓦迪奥尔",
+            "shirtnumber": "24",
+            "person_en_name": "Josko Gvardiol"
           },
           {
             "person_id": "50402406",
             "type": "defender",
-            "person_name": "格伊"
+            "person_name": "格伊",
+            "shirtnumber": "6",
+            "person_en_name": "Marc Guéhi"
           },
           {
             "person_id": "50443847",
             "type": "defender",
-            "person_name": "艾特-努里"
+            "person_name": "艾特-努里",
+            "shirtnumber": "21",
+            "person_en_name": "Rayan Aït-Nouri"
           },
           {
             "person_id": "50555737",
             "type": "defender",
-            "person_name": "里科-刘易斯"
+            "person_name": "里科-刘易斯",
+            "shirtnumber": "82",
+            "person_en_name": "Rico Lewis"
           },
           {
             "person_id": "50665740",
             "type": "defender",
-            "person_name": "奥赖利"
+            "person_name": "奥赖利",
+            "shirtnumber": "33",
+            "person_en_name": "Nico O'Reilly"
           },
           {
             "person_id": "50185896",
             "type": "defender",
-            "person_name": "鲁本-迪亚斯"
+            "person_name": "鲁本-迪亚斯",
+            "shirtnumber": "3",
+            "person_en_name": "Rúben Dias"
           },
           {
             "person_id": "50761937",
             "type": "defender",
-            "person_name": "胡桑诺夫"
+            "person_name": "胡桑诺夫",
+            "shirtnumber": "45",
+            "person_en_name": "Abdukodir Khusanov"
           },
           {
             "person_id": "50460407",
             "type": "defender",
-            "person_name": "努内斯"
+            "person_name": "努内斯",
+            "shirtnumber": "27",
+            "person_en_name": "Matheus Nunes"
           },
           {
             "person_id": "50924280",
             "type": "defender",
-            "person_name": "维托尔-雷斯"
+            "person_name": "维托尔-雷斯",
+            "shirtnumber": "22",
+            "person_en_name": "Vitor Reis"
           }
         ],
         "show_type": 1,
@@ -233,17 +275,23 @@
           {
             "person_id": "50228675",
             "type": "goalkeeper",
-            "person_name": "多纳鲁马"
+            "person_name": "多纳鲁马",
+            "shirtnumber": "1",
+            "person_en_name": "Gianluigi Donnarumma"
           },
           {
             "person_id": "50099754",
             "type": "goalkeeper",
-            "person_name": "鲁利"
+            "person_name": "鲁利",
+            "shirtnumber": "28",
+            "person_en_name": "Gerónimo Rulli"
           },
           {
             "person_id": "50124345",
             "type": "goalkeeper",
-            "person_name": "贝蒂内利"
+            "person_name": "贝蒂内利",
+            "shirtnumber": "13",
+            "person_en_name": "Marcus Bettinelli"
           }
         ],
         "show_type": 1,

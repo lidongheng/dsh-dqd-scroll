@@ -90,12 +90,34 @@ def parse_team_roster(response_body: object) -> TeamRoster:
                     f'data.list[{group_index}].data[{member_index}].person_name 必须是非空字符串。'
                 );
 
-            roster_member = RosterMember(person_id=person_id, person_name=person_name, attr=attr);
+            if group_type in PLAYER_GROUP_TYPES:
+                shirt_number = member.get('shirtnumber');
+                if not isinstance(shirt_number, str):
+                    raise ValueError(
+                        f'data.list[{group_index}].data[{member_index}].shirtnumber 必须是字符串。'
+                    );
+                person_en_name = member.get('person_en_name');
+                if not isinstance(person_en_name, str):
+                    raise ValueError(
+                        f'data.list[{group_index}].data[{member_index}].person_en_name 必须是字符串。'
+                    );
+            else:
+                # 当前名单响应的主教练记录没有球衣号码或英文名。
+                shirt_number = None;
+                person_en_name = None;
+
+            roster_member = RosterMember(
+                person_id=person_id,
+                person_name=person_name,
+                attr=attr,
+                shirt_number=shirt_number,
+                person_en_name=person_en_name,
+            );
             existing_member = roster_members_by_id.get(person_id);
             if existing_member is not None:
                 if existing_member != roster_member:
                     raise ValueError(
-                        f'球队名单中 person_id={person_id} 重复且姓名或 attr 不一致。'
+                        f'球队名单中 person_id={person_id} 重复且人员资料不一致。'
                     );
                 continue;
             roster_members_by_id[person_id] = roster_member;

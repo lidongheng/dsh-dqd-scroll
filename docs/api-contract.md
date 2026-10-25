@@ -34,7 +34,7 @@
 
 ## 球队名单响应：样本已确认的字段
 
-样本文件：[team-roster.response.sample.json](../fixtures/team-roster.response.sample.json)。它从用户提供的响应正文裁剪生成，球员分组保留 `person_id`、`person_name` 和成员 `type`；教练分组额外保留主教练的 ID 与姓名，其他教练和工作人员只保留识别分组所需字段。年龄、图片链接、薪资等非必要字段未写入仓库。
+样本文件：[team-roster.response.sample.json](../fixtures/team-roster.response.sample.json)。它从用户提供的响应正文裁剪生成，球员分组保留 `person_id`、`person_name`、`shirtnumber`、`person_en_name` 和成员 `type`；教练分组额外保留主教练的 ID 与姓名，其他教练和工作人员只保留识别分组所需字段。年龄、图片链接、薪资等非必要字段未写入仓库。
 
 | JSON 路径 | 样本中观察到的结构 | 当前处理 |
 |---|---|---|
@@ -44,11 +44,14 @@
 | `data.list[].type` | `coach`、`manager`、`attacker`、`midfielder`、`defender`、`goalkeeper` | 提取四种球员位置分组和教练分组中的主教练；跳过其他教练组人员和工作人员 |
 | `data.list[].data[].person_id` | 数字字符串 | 转成正整数后交给 SQLite；样本中的 24 个球员 ID 均不重复 |
 | `data.list[].data[].person_name` | 球员和主教练记录中的非空字符串 | 写入 `players.person_name`；每次名单同步都按新响应更新姓名 |
+| 球员 `shirtnumber` | 字符串 | 写入 `players.shirt_number`；球员记录必须提供该字段 |
+| 球员 `person_en_name` | 字符串 | 写入 `players.person_en_name`；球员记录必须提供该字段 |
 | `data.list[].title` | 球员分组标题：前锋、中场、后卫、门将 | 写入 `players.attr`；主教练记录的 `attr` 固定为“主教练” |
 | `coach` 分组中的 `data[].type` | 人员岗位字符串，样本中主教练为“主教练” | 只导入唯一一条 `type=主教练` 的记录作为球队名单的一行 |
+| 主教练记录中的 `shirtnumber`、`person_en_name` | 用户提供的响应中均未出现 | `players.shirt_number` 和 `players.person_en_name` 保存为 SQL `NULL` |
 | `seasons` | 赛季选项数组，包含 `url` | 作为响应数据保存；不能据此确认本次实际请求的 URL 或参数 |
 
-样本共有 40 条成员记录：前锋 6、中场 6、后卫 9、门将 3，共 24 名球员；`coach` 分组包含 12 人，其中只导入唯一的主教练 1 人；`manager` 分组的 4 名工作人员不导入。清洗和解析器在 [team_roster.py](../src/dqd_scroll/lib/team_roster.py)，离线导入流程在 [workflow.py](../src/dqd_scroll/workflow.py)。因此样本会写入 25 条名单关联。每次得到新响应都会在同一数据库事务中更新 `players.person_name`、`players.attr`，并替换 `team_players` 中对应球队的人员关联；转会球员从旧队名单移除后，人员主表仍保留其记录。当前流程读取本地响应文件，真实网络请求尚未实现。这只是一个响应样本，不能证明所有球队、赛季和 APP 版本都返回相同字段。
+样本共有 40 条成员记录：前锋 6、中场 6、后卫 9、门将 3，共 24 名球员；`coach` 分组包含 12 人，其中只导入唯一的主教练 1 人；`manager` 分组的 4 名工作人员不导入。清洗和解析器在 [team_roster.py](../src/dqd_scroll/lib/team_roster.py)，离线导入流程在 [workflow.py](../src/dqd_scroll/workflow.py)。因此样本会写入 25 条名单关联。每次得到新响应都会在同一数据库事务中更新 `players.person_name`、`players.attr`、`players.shirt_number`、`players.person_en_name`，并替换 `team_players` 中对应球队的人员关联；转会球员从旧队名单移除后，人员主表仍保留其记录。当前流程读取本地响应文件，真实网络请求尚未实现。这只是一个响应样本，不能证明所有球队、赛季和 APP 版本都返回相同字段。
 
 样本的 `seasons[].url` 中可见当前赛季链接带有 `lang=zh-cn`、`season=0`、`current=1`，历史赛季链接使用不同的 `season` 值；旧 Postman 线索则出现 `app=dqd`。这些都是观察到的候选参数，只有抓到 APP 本次实际发出的原始请求后，才能确认哪些参数实际发送、哪些必需。
 

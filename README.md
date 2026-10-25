@@ -42,7 +42,7 @@ dsh plugin --profile web remove dsh-dqd-scroll
 - [x] 提供 `status`、`db-init`、离线 `roster-import`、`schedule-import` 和 `schedule-report` CLI 命令。
 - [x] 在项目根目录 `teams.json` 中保存 20 支球队的懂球帝/球探映射，以及英超联赛信息。
 - [x] 初始化 SQLite：`teams` 表由 `teams.json` 种子数据填充；当前开发数据库已导入曼城 24 名球员、1 名主教练，以及 `league_serial=36` 对应的 `2026/2027` 赛季和 52 场赛程；实时抓取仍未实现。
-- [x] 根据用户提供的名单响应，确认球员分组位于 `data.list`，人员 ID 和姓名分别位于 `data.list[].data[].person_id`、`data.list[].data[].person_name`；球员位置取分组标题。
+- [x] 根据用户提供的名单响应，确认球员分组位于 `data.list`，人员 ID、姓名、球衣号码和英文名分别取自 `person_id`、`person_name`、`shirtnumber`、`person_en_name`；球员位置取分组标题。
 - [x] 编写离线响应校验和解析：导入前锋、中场、后卫、门将及唯一主教练，跳过其他教练和工作人员；共 25 条名单记录。
 - [x] 增加 `roster-import` 命令：每次导入都会刷新人员姓名和 `attr` 并替换该队名单关联；这是读取本地样本，不是实时抓取。
 - [x] 根据用户提供的球队赛程 URL 和响应样本，识别 `season_list` 当前赛季及 `data` 中的比赛字段。
@@ -150,7 +150,7 @@ python -m dqd_scroll daily-report --database data/dqd_scroll.sqlite3 --team-id 5
 
 `teams.json` 只包含球队及联赛映射，不包含球员名单或赛程。新机器运行安装初始化后会得到 `teams` 表，但需要再用对应的名单、赛程样本运行 `roster-import` 和 `schedule-import`；其他机器已有的 `data/` SQLite 文件不会随代码仓库同步。
 
-`roster-import` 使用 `--database` 指定已初始化的数据库，并读取本地 JSON 响应文件，不会访问懂球帝；导入前会确认球队已存在于 SQLite。它会校验人员 ID、姓名和 `attr`，在同一事务中刷新 `players` 人员资料并替换指定球队的 `team_players` 关联。`players.attr` 保存球员位置（前锋、中场、后卫、门将）；主教练也保存为一条人员记录，`attr` 为“主教练”。未来实现在线名单请求后，每次请求成功也要走同一同步流程，转会或更名才会反映到数据库。当前附带的是一份历史响应样本，导入它只会把数据库更新到该样本记录的名单状态，不代表懂球帝当前名单。
+`roster-import` 使用 `--database` 指定已初始化的数据库，并读取本地 JSON 响应文件，不会访问懂球帝；导入前会确认球队已存在于 SQLite。已有数据库先运行 `db-init`，它会迁移 `players` 表并添加新列。名单导入会校验人员 ID、姓名、球员的球衣号码和英文名及 `attr`，在同一事务中刷新 `players` 人员资料并替换指定球队的 `team_players` 关联。接口字段 `shirtnumber` 写入 `players.shirt_number`，`person_en_name` 写入同名列；教练记录没有这两个球员字段，数据库中保留为 `NULL`。`players.attr` 保存球员位置（前锋、中场、后卫、门将）；主教练也保存为一条人员记录，`attr` 为“主教练”。未来实现在线名单请求后，每次请求成功也要走同一同步流程，转会或更名才会反映到数据库。当前附带的是一份历史响应样本，导入它只会把数据库更新到该样本记录的名单状态，不代表懂球帝当前名单。
 
 `schedule-import` 读取本地赛程响应文件，不会访问懂球帝。它要求 `season_list` 中恰有一个 `current=true` 的赛季，并校验其 `sort` 最大；命令还要求提供该响应对应的 `--request-url`，校验 URL 中的球队 ID 和 `season` 与响应当前赛季一致。`data` 中每场比赛都必须包含目标球队；同一 `match_id` 的完全相同记录会合并，字段冲突会报错。入库前会把 A/B 字段清洗成下划线命名；每队仅保留 `league_seasons` 所指向的当前赛季赛程。导入更高 `season_sort` 的新赛季时，会清掉该联赛所有球队的旧赛季赛程，然后保存当前球队的新赛程。`schedule-report` 从 SQLite 读取赛程，并按所选球队视角输出对手、比分、点球、比赛标题和状态；空字段按接口原样保留，不推断主客场。
 

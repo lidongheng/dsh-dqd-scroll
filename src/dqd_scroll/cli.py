@@ -38,7 +38,7 @@ def import_team_roster_response(database_path: Path, dqd_team_id: int, response_
     response_body = json.loads(resolved_response_path.read_text(encoding='utf-8'));
 
     saved_count = save_team_roster_response(repository, dqd_team_id, response_body);
-    print(f'从响应文件刷新人员姓名和 attr，并替换球队名单: {saved_count} 条');
+    print(f'从响应文件刷新人员姓名、球衣号码、英文名和 attr，并替换球队名单: {saved_count} 条');
     print(f'球队: {team.dqd_name}（懂球帝 ID {dqd_team_id}）');
     return 0;
 
@@ -196,7 +196,10 @@ def build_parser() -> argparse.ArgumentParser:
     database_parser.add_argument('--teams', type=Path, help='球队映射 JSON 文件路径');
     database_parser.set_defaults(handler=initialize_database);
 
-    roster_parser = subparsers.add_parser('roster-import', help='从响应文件刷新人员姓名和 attr 并替换球队名单');
+    roster_parser = subparsers.add_parser(
+        'roster-import',
+        help='从响应文件刷新人员姓名、球衣号码、英文名和 attr 并替换球队名单',
+    );
     roster_parser.add_argument('--database', type=Path, required=True, help='已初始化的 SQLite 数据库文件路径');
     roster_parser.add_argument('--team-id', type=int, required=True, help='懂球帝球队 ID');
     roster_parser.add_argument('--response-file', type=Path, required=True, help='球队名单 JSON 响应文件');

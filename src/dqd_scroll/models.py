@@ -24,6 +24,9 @@ class RosterMember:
     person_name: str;
     # attr 表示接口返回的位置或岗位，例如“前锋”或“主教练”，会写入 players 表。
     attr: str;
+    # 接口字段 shirtnumber 映射到数据库列 shirt_number；教练响应不包含这两个球员字段。
+    shirt_number: str | None;
+    person_en_name: str | None;
 
 
 @dataclass(frozen=True)
