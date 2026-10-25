@@ -7,6 +7,7 @@ on:
 jobs:
   verify:
     runs-on: ${{ matrix.os }}
+    timeout-minutes: 20
     strategy:
       fail-fast: false
       matrix:
@@ -23,6 +24,7 @@ jobs:
         with:
           python-version: '3.11'
       - run: npm test
+      - run: node scripts/verify-python-bootstrap.mjs
       - run: npm pack --dry-run --json
       - run: python -m compileall -q src/dqd_scroll
 
