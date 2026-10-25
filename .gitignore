@@ -1,0 +1,22 @@
+# Python bytecode and package build artifacts.
+__pycache__/
+*.py[cod]
+*.egg-info/
+build/
+dist/
+
+# Generated reports.
+out/
+
+# Local environments and user data.
+.conda/
+.venv/
+.data/
+data/
+.env
+
+# Local editor and operating-system files.
+.vscode/
+.idea/
+Thumbs.db
+.DS_Store

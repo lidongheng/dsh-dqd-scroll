@@ -1,0 +1,324 @@
+{
+  "code": 0,
+  "message": "",
+  "data": {
+    "list": [
+      {
+        "data": [
+          {
+            "person_id": "50002854",
+            "type": "主教练",
+            "person_name": "马雷斯卡"
+          },
+          {
+            "person_id": "50014330",
+            "type": "助理教练"
+          },
+          {
+            "person_id": "50042354",
+            "type": "助理教练"
+          },
+          {
+            "person_id": "50743880",
+            "type": "助理教练"
+          },
+          {
+            "person_id": "50764652",
+            "type": "战术教练"
+          },
+          {
+            "person_id": "50002631",
+            "type": "守门员教练"
+          },
+          {
+            "person_id": "51122491",
+            "type": "守门员教练"
+          },
+          {
+            "person_id": "50434008",
+            "type": "体能教练"
+          },
+          {
+            "person_id": "51125240",
+            "type": "体能教练"
+          },
+          {
+            "person_id": "51125909",
+            "type": "体能教练"
+          },
+          {
+            "person_id": "51177775",
+            "type": "体能教练"
+          },
+          {
+            "person_id": "51281302",
+            "type": "体能教练"
+          }
+        ],
+        "show_type": 2,
+        "statistics": [],
+        "title": "教练",
+        "type": "coach"
+      },
+      {
+        "data": [
+          {
+            "person_id": "50772032",
+            "type": "老板"
+          },
+          {
+            "person_id": "50772029",
+            "type": "主席"
+          },
+          {
+            "person_id": "50000346",
+            "type": "足球总监"
+          },
+          {
+            "person_id": "50764017",
+            "type": "总经理"
+          }
+        ],
+        "show_type": 2,
+        "statistics": [],
+        "title": "工作人员",
+        "type": "manager"
+      },
+      {
+        "data": [
+          {
+            "person_id": "50259656",
+            "type": "attacker",
+            "person_name": "哈兰德"
+          },
+          {
+            "person_id": "50436685",
+            "type": "attacker",
+            "person_name": "塞门约"
+          },
+          {
+            "person_id": "50472243",
+            "type": "attacker",
+            "person_name": "多库"
+          },
+          {
+            "person_id": "50971800",
+            "type": "attacker",
+            "person_name": "瑞安-麦卡杜"
+          },
+          {
+            "person_id": "50853376",
+            "type": "attacker",
+            "person_name": "阿兰"
+          },
+          {
+            "person_id": "50471785",
+            "type": "attacker",
+            "person_name": "恩迪亚耶"
+          }
+        ],
+        "show_type": 1,
+        "statistics": [
+          "出场",
+          "进球",
+          "助攻",
+          "身价(欧)"
+        ],
+        "title": "前锋",
+        "type": "attacker"
+      },
+      {
+        "data": [
+          {
+            "person_id": "50469707",
+            "type": "midfielder",
+            "person_name": "谢尔基"
+          },
+          {
+            "person_id": "50267167",
+            "type": "midfielder",
+            "person_name": "福登"
+          },
+          {
+            "person_id": "50245370",
+            "type": "midfielder",
+            "person_name": "埃利奥特-安德森"
+          },
+          {
+            "person_id": "50486059",
+            "type": "midfielder",
+            "person_name": "恩佐-费尔南德斯"
+          },
+          {
+            "person_id": "50922131",
+            "type": "midfielder",
+            "person_name": "布阿迪"
+          },
+          {
+            "person_id": "50102192",
+            "type": "midfielder",
+            "person_name": "科瓦契奇"
+          }
+        ],
+        "show_type": 1,
+        "statistics": [
+          "出场",
+          "进球",
+          "助攻",
+          "身价(欧)"
+        ],
+        "title": "中场",
+        "type": "midfielder"
+      },
+      {
+        "data": [
+          {
+            "person_id": "50475427",
+            "type": "defender",
+            "person_name": "格瓦迪奥尔"
+          },
+          {
+            "person_id": "50402406",
+            "type": "defender",
+            "person_name": "格伊"
+          },
+          {
+            "person_id": "50443847",
+            "type": "defender",
+            "person_name": "艾特-努里"
+          },
+          {
+            "person_id": "50555737",
+            "type": "defender",
+            "person_name": "里科-刘易斯"
+          },
+          {
+            "person_id": "50665740",
+            "type": "defender",
+            "person_name": "奥赖利"
+          },
+          {
+            "person_id": "50185896",
+            "type": "defender",
+            "person_name": "鲁本-迪亚斯"
+          },
+          {
+            "person_id": "50761937",
+            "type": "defender",
+            "person_name": "胡桑诺夫"
+          },
+          {
+            "person_id": "50460407",
+            "type": "defender",
+            "person_name": "努内斯"
+          },
+          {
+            "person_id": "50924280",
+            "type": "defender",
+            "person_name": "维托尔-雷斯"
+          }
+        ],
+        "show_type": 1,
+        "statistics": [
+          "出场",
+          "进球",
+          "助攻",
+          "身价(欧)"
+        ],
+        "title": "后卫",
+        "type": "defender"
+      },
+      {
+        "data": [
+          {
+            "person_id": "50228675",
+            "type": "goalkeeper",
+            "person_name": "多纳鲁马"
+          },
+          {
+            "person_id": "50099754",
+            "type": "goalkeeper",
+            "person_name": "鲁利"
+          },
+          {
+            "person_id": "50124345",
+            "type": "goalkeeper",
+            "person_name": "贝蒂内利"
+          }
+        ],
+        "show_type": 1,
+        "statistics": [
+          "出场",
+          "扑救",
+          "解围",
+          "身价(欧)"
+        ],
+        "title": "门将",
+        "type": "goalkeeper"
+      }
+    ]
+  },
+  "seasons": [
+    {
+      "current": true,
+      "id": 0,
+      "name": "2026/2027",
+      "sort": 93,
+      "url": "https://sport-data.dongqiudi.com/soccer/biz/dqd/v1/team/member_v2/50000529?lang=zh-cn&season=0&current=1"
+    },
+    {
+      "id": 0,
+      "name": "2025/2026",
+      "sort": 92,
+      "url": "https://sport-data.dongqiudi.com/soccer/biz/dqd/v1/team/member_v2/50000529?lang=zh-cn&season=2026&current=0"
+    },
+    {
+      "id": 0,
+      "name": "2024/2025",
+      "sort": 91,
+      "url": "https://sport-data.dongqiudi.com/soccer/biz/dqd/v1/team/member_v2/50000529?lang=zh-cn&season=2025&current=0"
+    },
+    {
+      "id": 0,
+      "name": "2023/2024",
+      "sort": 90,
+      "url": "https://sport-data.dongqiudi.com/soccer/biz/dqd/v1/team/member_v2/50000529?lang=zh-cn&season=2024&current=0"
+    },
+    {
+      "id": 0,
+      "name": "2022/2023",
+      "sort": 89,
+      "url": "https://sport-data.dongqiudi.com/soccer/biz/dqd/v1/team/member_v2/50000529?lang=zh-cn&season=2023&current=0"
+    },
+    {
+      "id": 0,
+      "name": "2021/2022",
+      "sort": 88,
+      "url": "https://sport-data.dongqiudi.com/soccer/biz/dqd/v1/team/member_v2/50000529?lang=zh-cn&season=2022&current=0"
+    },
+    {
+      "id": 0,
+      "name": "2020/2021",
+      "sort": 87,
+      "url": "https://sport-data.dongqiudi.com/soccer/biz/dqd/v1/team/member_v2/50000529?lang=zh-cn&season=2021&current=0"
+    },
+    {
+      "id": 0,
+      "name": "2019/2020",
+      "sort": 86,
+      "url": "https://sport-data.dongqiudi.com/soccer/biz/dqd/v1/team/member_v2/50000529?lang=zh-cn&season=2020&current=0"
+    },
+    {
+      "id": 0,
+      "name": "2018/2019",
+      "sort": 85,
+      "url": "https://sport-data.dongqiudi.com/soccer/biz/dqd/v1/team/member_v2/50000529?lang=zh-cn&season=2019&current=0"
+    },
+    {
+      "id": 0,
+      "name": "2017/2018",
+      "sort": 84,
+      "url": "https://sport-data.dongqiudi.com/soccer/biz/dqd/v1/team/member_v2/50000529?lang=zh-cn&season=2018&current=0"
+    }
+  ]
+}

@@ -1,0 +1,1 @@
+# DQD API adapter package.
