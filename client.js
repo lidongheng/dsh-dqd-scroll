@@ -30,6 +30,11 @@ window.__ModuleLoader__.load({
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify(settings),
     });
+    const installPythonEnvironment = () => request('/python-environment/install', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({}),
+    });
     const refreshMitmCa = () => request('/tools/refresh-mitm-ca', {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
@@ -58,6 +63,7 @@ window.__ModuleLoader__.load({
 
     function Panel() {
       const [settings, setSettings] = React.useState(null);
+      const [pythonEnvironment, setPythonEnvironment] = React.useState(null);
       const [dailyRunTime, setDailyRunTime] = React.useState(null);
       const [teamNamesText, setTeamNamesText] = React.useState(null);
       const [interestsText, setInterestsText] = React.useState(null);
@@ -72,6 +78,7 @@ window.__ModuleLoader__.load({
         getSettings().then((response) => {
           if (!active) return;
           setSettings(response.settings);
+          setPythonEnvironment(response.pythonEnvironment);
           setDailyRunTime(response.settings.dailyRunTime);
           setTeamNamesText(response.settings.teamNames.join('\n'));
           setInterestsText(response.settings.interests.join('\n'));
@@ -147,6 +154,20 @@ window.__ModuleLoader__.load({
         }
       };
 
+      const onInstallPythonEnvironment = async () => {
+        setBusy('python-environment');
+        showMessage('', '');
+        try {
+          const response = await installPythonEnvironment();
+          setPythonEnvironment(response.pythonEnvironment);
+          showMessage(response.pythonEnvironment.output, 'success');
+        } catch (error) {
+          showMessage(error.message, 'error');
+        } finally {
+          setBusy('');
+        }
+      };
+
       let settingsContent;
       if (settings === null) {
         const loadingText = loadingError || '正在读取项目配置…';
@@ -162,7 +183,7 @@ window.__ModuleLoader__.load({
             value: dailyRunTime,
             onChange: (event) => setDailyRunTime(event.target.value),
           }),
-          h('div', { 'data-dqd-note': '' }, '按 Asia/Shanghai 时区检查。每天成功生成一次；球队名称需与 config.toml 的 teams[].dqd_name 完全一致，可用名称见项目根目录 config.toml；关注内容留空时不会自动生成日报。'),
+          h('div', { 'data-dqd-note': '' }, '按 Asia/Shanghai 时区检查。每天成功生成一次；球队名称需与项目根目录 teams.json 的 dqd_name 完全一致；关注内容留空时不会自动生成日报。'),
           h('label', { 'data-dqd-label': '', htmlFor: 'dqd-scroll-team-names' }, '关注球队（每行一个懂球帝球队名称）'),
           h('textarea', {
             id: 'dqd-scroll-team-names',
@@ -192,6 +213,18 @@ window.__ModuleLoader__.load({
       return h('div', { 'data-dqd-page': '' },
         h('h1', { 'data-dqd-title': '' }, '懂球帝动态日报'),
         settingsContent,
+        pythonEnvironment === null ? null : h('div', { 'data-dqd-section': '' },
+          h('h2', { 'data-dqd-section-title': '' }, '本机 Python 环境与数据初始化'),
+          h('div', { 'data-dqd-note': '' }, pythonEnvironment.ready
+            ? `Python ${pythonEnvironment.pythonVersion} 已就绪：${pythonEnvironment.pythonPath}`
+            : '尚未初始化。此操作会在本机 DSH 数据目录创建 Python 3.11+ 独立环境，并从 teams.json 初始化 SQLite 的 teams 表。'),
+          h('div', { 'data-dqd-note': '' }, '首次安装需要本机 Python 3.11+，且当前 DSH 进程可通过 python 命令启动它。每台机器分别安装；球队数据来自项目根目录 teams.json。'),
+          h('button', {
+            'data-dqd-button': '',
+            'data-primary': '',
+            disabled: Boolean(busy),
+            onClick: onInstallPythonEnvironment,
+          }, busy === 'python-environment' ? '安装和初始化中…' : '安装本机环境并初始化球队数据')),
         h('div', { 'data-dqd-section': '' },
           h('h2', { 'data-dqd-section-title': '' }, '维护工具'),
           h('div', { 'data-dqd-note': '' }, '此操作要求 LDPlayer14 的 emulator-5556 在线且可用 root，并要求本机 mitmproxy CA 与脚本内固定 SHA-256 一致。'),

@@ -1,5 +1,5 @@
-import { spawn } from 'node:child_process';
-import { existsSync, readFileSync, renameSync, unlinkSync, writeFileSync } from 'node:fs';
+import { spawn, spawnSync } from 'node:child_process';
+import { existsSync, mkdirSync, readFileSync, renameSync, unlinkSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 
 const MAX_REQUEST_BYTES = 16_384;
@@ -305,9 +305,103 @@ const appendBounded = (current, chunk) => {
   return combined.slice(Math.max(0, combined.length - MAX_TOOL_OUTPUT_CHARS));
 };
 
-export function registerDqdSettingsApi(context, projectDir, configPath) {
+export function registerDqdSettingsApi(context, projectDir, configPath, stateDir) {
   const scriptPath = join(projectDir, 'tools', 'refresh-dqd-mitm-ca.ps1');
+  const pythonEnvironmentPath = join(stateDir, 'python-environment.json');
+  const pythonEnvironmentDir = join(stateDir, '.venv');
   let activeMaintenanceProcess = null;
+
+  const pythonEnvironmentPython = () => process.platform === 'win32'
+    ? join(pythonEnvironmentDir, 'Scripts', 'python.exe')
+    : join(pythonEnvironmentDir, 'bin', 'python');
+
+  const readPythonEnvironment = () => {
+    if (!existsSync(pythonEnvironmentPath)) return { ready: false, pythonPath: '' };
+    const savedEnvironment = JSON.parse(readFileSync(pythonEnvironmentPath, 'utf8'));
+    if (typeof savedEnvironment.pythonPath !== 'string' || savedEnvironment.pythonPath.length === 0) {
+      throw new Error('本机 Python 环境记录缺少有效的 pythonPath。');
+    }
+    return {
+      ready: existsSync(savedEnvironment.pythonPath),
+      pythonPath: savedEnvironment.pythonPath,
+      pythonVersion: savedEnvironment.pythonVersion,
+    };
+  };
+
+  const installPythonEnvironment = () => {
+    // 每台机器从本机 Python 创建同一项目专用的 venv，DB 初始化也在此环境执行。
+    const versionResult = spawnSync('python', [
+      '-c',
+      'import sys; print(f"{sys.version_info.major}.{sys.version_info.minor}")',
+    ], {
+      cwd: projectDir,
+      encoding: 'utf8',
+      windowsHide: true,
+    });
+    if (versionResult.error) {
+      throw httpError(
+        '本机找不到 python 命令。请安装 Python 3.11 或更高版本，并让当前 DSH 进程可以通过 python 命令启动它。',
+        400,
+      );
+    }
+    if (versionResult.status !== 0) {
+      throw new Error(`读取本机 Python 版本失败: ${versionResult.stderr || versionResult.stdout}`);
+    }
+    const versionMatch = /^(\d+)\.(\d+)$/.exec(versionResult.stdout.trim());
+    if (!versionMatch) throw new Error(`无法识别本机 Python 版本: ${versionResult.stdout.trim()}`);
+    const pythonVersion = `${versionMatch[1]}.${versionMatch[2]}`;
+    if (Number(versionMatch[1]) < 3 || (Number(versionMatch[1]) === 3 && Number(versionMatch[2]) < 11)) {
+      throw httpError(`本项目需要 Python 3.11 或更高版本，当前检测到 ${pythonVersion}。`, 400);
+    }
+
+    mkdirSync(stateDir, { recursive: true });
+    const environmentResult = spawnSync('python', ['-m', 'venv', pythonEnvironmentDir], {
+      cwd: projectDir,
+      encoding: 'utf8',
+      windowsHide: true,
+    });
+    if (environmentResult.error) throw environmentResult.error;
+    if (environmentResult.status !== 0) {
+      const output = [environmentResult.stdout, environmentResult.stderr].filter(Boolean).join('\n');
+      throw new Error(`创建本机 Python 环境失败: ${output || `exit=${environmentResult.status}`}`);
+    }
+
+    const pythonPath = pythonEnvironmentPython();
+    if (!existsSync(pythonPath)) throw new Error(`Python 环境创建后未找到解释器: ${pythonPath}`);
+    const databaseResult = spawnSync(pythonPath, [
+      '-m',
+      'dqd_scroll',
+      'db-init',
+      '--config',
+      configPath,
+    ], {
+      cwd: projectDir,
+      encoding: 'utf8',
+      env: {
+        ...process.env,
+        PYTHONPATH: join(projectDir, 'src'),
+        PYTHONUTF8: '1',
+        PYTHONIOENCODING: 'utf-8',
+      },
+      windowsHide: true,
+    });
+    if (databaseResult.error) throw databaseResult.error;
+    if (databaseResult.status !== 0) {
+      const output = [databaseResult.stdout, databaseResult.stderr].filter(Boolean).join('\n');
+      throw new Error(`Python 环境已创建，但初始化球队数据库失败: ${output || `exit=${databaseResult.status}`}`);
+    }
+
+    writeFileSync(pythonEnvironmentPath, JSON.stringify({
+      pythonPath,
+      pythonVersion,
+    }, null, 2), 'utf8');
+    return {
+      ready: true,
+      pythonPath,
+      pythonVersion,
+      output: databaseResult.stdout.trim(),
+    };
+  };
 
   const runMitmCaRefresh = () => new Promise((resolve, reject) => {
     if (process.platform !== 'win32') {
@@ -371,13 +465,21 @@ export function registerDqdSettingsApi(context, projectDir, configPath) {
       try {
         if (request.method === 'GET' && url.pathname === '/api/dqd-scroll/settings') {
           const text = readFileSync(configPath, 'utf8');
-          return sendJson(response, 200, { ok: true, settings: readSettingsFromText(text) });
+          return sendJson(response, 200, {
+            ok: true,
+            settings: readSettingsFromText(text),
+            pythonEnvironment: readPythonEnvironment(),
+          });
         }
 
         if (request.method === 'POST' && url.pathname === '/api/dqd-scroll/settings') {
           const settings = validateSettings(await readJsonBody(request));
           const savedSettings = writeSettings(configPath, settings);
           return sendJson(response, 200, { ok: true, settings: savedSettings });
+        }
+
+        if (request.method === 'POST' && url.pathname === '/api/dqd-scroll/python-environment/install') {
+          return sendJson(response, 200, { ok: true, pythonEnvironment: installPythonEnvironment() });
         }
 
         if (request.method === 'POST' && url.pathname === '/api/dqd-scroll/tools/refresh-mitm-ca') {

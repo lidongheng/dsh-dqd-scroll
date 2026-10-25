@@ -198,7 +198,10 @@ class Repository:
                 (team_id,),
             ).fetchone();
         if row is None:
-            raise ValueError(f'team_id={team_id} is not present in the teams table.');
+            raise ValueError(
+                f'team_id={team_id} 不在 SQLite 的 teams 表中；'
+                '请在项目根目录 teams.json 添加该球队的完整映射后，运行 db-init --config config.toml。'
+            );
         return Team(
             team_id=row[0],
             dqd_name=row[1],

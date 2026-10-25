@@ -8,8 +8,8 @@
 
 - [x] 创建 Conda 环境和 Python 包结构。
 - [x] 提供 `status`、`db-init`、离线 `roster-import`、`schedule-import` 和 `schedule-report` CLI 命令。
-- [x] 在 `config.toml` 中保存 20 支球队的懂球帝/球探映射，以及英超联赛信息。
-- [x] 初始化 SQLite：`teams` 表已有 20 支球队映射；已导入曼城 24 名球员、1 名主教练，以及 `league_serial=36` 对应的 `2026/2027` 赛季和 52 场赛程；实时抓取仍未实现。
+- [x] 在项目根目录 `teams.json` 中保存 20 支球队的懂球帝/球探映射，以及英超联赛信息。
+- [x] 初始化 SQLite：`teams` 表由 `teams.json` 种子数据填充；当前开发数据库已导入曼城 24 名球员、1 名主教练，以及 `league_serial=36` 对应的 `2026/2027` 赛季和 52 场赛程；实时抓取仍未实现。
 - [x] 根据用户提供的名单响应，确认球员分组位于 `data.list`，人员 ID 和姓名分别位于 `data.list[].data[].person_id`、`data.list[].data[].person_name`；球员位置取分组标题。
 - [x] 编写离线响应校验和解析：导入前锋、中场、后卫、门将及唯一主教练，跳过其他教练和工作人员；共 25 条名单记录。
 - [x] 增加 `roster-import` 命令：每次导入都会刷新人员姓名和 `attr` 并替换该队名单关联；这是读取本地样本，不是实时抓取。
@@ -19,7 +19,7 @@
 - [x] 增加赛程导入与 Markdown 加工输出；赛程按目标球队视角给出对手和比分，同时保留接口 A/B 侧别，不推断主客场。
 - [x] 增加最小 `daily-report` 流程：从 SQLite 当前赛季 `team_schedules` 读取曼城赛程，筛选未来一个自然月并写入 `out/<日期>.md`；首次样例基于 2026-10-25，包含 6 场比赛。
 - [x] 根据 mitmweb 与 Postman 中成功的曼城动态请求，实现只读 GET 与 `data.next` 分页跟随；按 `show_time` / `next.after` 到达用户所选开始时间后停止，检测重复 next URL，并设置 50 页上限。
-- [x] 增加 `dynamics-report`：按 DSH 设置中的球队名称从 `teams[].dqd_name` 找到懂球帝 ID，每支球队分别生成全部动态和兴趣命中动态报告；不写数据库或原始响应文件。
+- [x] 增加 `dynamics-report`：按 DSH 设置中的球队名称从 `teams.json` 的 `dqd_name` 找到懂球帝 ID，每支球队分别生成全部动态和兴趣命中动态报告；不写数据库或原始响应文件。
 - [x] 增加动态日报时间范围入口：可手动传 `--since` 和 `--until`，不传时生成上海时区当天 00:00 到当前时刻的日报。
 - [x] 增加 DSH 插件每日调度：读取配置中的 `daily_run_time`，每天到点后运行动态日报 CLI。
 
@@ -27,7 +27,7 @@
 
 - 动态日报和 DSH 每日调度属于第一版可用功能。
 - 名单与赛程目前只支持本地样本导入，不包含实时请求；球员资料、统计和能力值接口仍待核验。
-- DSH 设置页提供关注球队、关注内容、自动运行时间和 LDPlayer CA 维护工具；球队名称按 `config.toml` 的 `teams[].dqd_name` 精确匹配，Python 路径仍在 `[dynamics]` 中维护。
+- DSH 设置页提供关注球队、关注内容、自动运行时间、本机 Python 环境安装和 LDPlayer CA 维护工具；球队名称按 `teams.json` 的 `dqd_name` 精确匹配。每台机器在自己的 DSH 数据目录创建 Python 虚拟环境，并保存该机器的解释器路径。
 
 ### 尚未完成
 
@@ -39,7 +39,7 @@
 
 ### 现在的下一步
 
-曼城动态只读请求已通过 mitmweb 与 Postman 核验并接入日报流程；日报会按设置中的球队名称从 `teams[].dqd_name` 映射 ID 并逐队请求。其他接口（球队名单、赛程、球员资料与统计）仍需分别核验请求契约；不要把真实 Cookie、Token 或账号标识写入项目或发给我。
+曼城动态只读请求已通过 mitmweb 与 Postman 核验并接入日报流程；日报会按设置中的球队名称从 `teams.json` 的 `dqd_name` 映射 ID 并逐队请求。其他接口（球队名单、赛程、球员资料与统计）仍需分别核验请求契约；不要把真实 Cookie、Token 或账号标识写入项目或发给我。
 
 把其余请求信息补入 [接口契约记录](docs/api-contract.md)。名单响应样本在 [team-roster.response.sample.json](fixtures/team-roster.response.sample.json)，赛程响应样本在 [team-schedule.response.sample.json](fixtures/team-schedule.response.sample.json)。赛程清洗和对阵视角加工位于 `src/dqd_scroll/lib/team_schedule.py`，导入流程位于 `src/dqd_scroll/workflow.py`；本地导入和报告命令分别是 `schedule-import`、`schedule-report`。赛程响应里的 `season_list[].url` 是服务端提供的赛季链接，不单独证明实际请求头或认证要求。名单、赛程等其他接口只有在契约核验后才实现在线请求。CLI 和 Python 脚本是 DSH 插件的后端调用方式；DeepSeek Harness bundle 入口已提供，项目不实现 MCP 服务。
 
@@ -58,7 +58,7 @@ dsh --profile desktop --dump-config
 dsh plugin --profile desktop remove dsh-dqd-scroll
 ```
 
-此方式直接使用当前工作区，因此本地 `config.toml`、SQLite 数据库和日报目录仍在项目目录中。首次使用时在 DSH 设置 → 刷懂球帝中填写关注内容和运行时间；Python 可执行文件仍需在 `config.toml` 中配置，自动日报还要求本地 SQLite 已初始化。设置页将兴趣词与运行时间写回当前工作区的 `config.toml`。
+此方式直接使用当前工作区；`config.toml` 和 `teams.json` 随项目分发，SQLite 数据库和日报目录保存在本机项目目录中。首次使用时在 DSH 设置 → 刷懂球帝中点击“安装本机环境并初始化球队数据”，安装器会在该机器的 DSH 数据目录创建独立 Python 虚拟环境，并运行 `db-init` 将 `teams.json` 写入 SQLite 的 `teams` 表。该机器需要安装 Python 3.11+，且 DSH 进程能通过 `python` 命令找到它。之后填写关注球队、关注内容和运行时间；兴趣词与运行时间会写回当前工作区的 `config.toml`。
 
 ## 创建并安装 Python 环境
 
@@ -82,22 +82,23 @@ python -m pip install -e .
 
 ## 配置球队
 
-编辑根目录的 [config.toml](config.toml)：
+编辑项目根目录的 [teams.json](teams.json)：
 
-```toml
-database_path = 'data/dqd_scroll.sqlite3'
-
-[[teams]]
-dqd_id = 50000529
-dqd_name = '曼城'
-qiutan_name = '曼彻斯特城'
-qiutan_serial = '26'
-league_serial = 36
-league_slug = 'epl'
-match_league_name = '英超'
+```json
+[
+  {
+    "dqd_id": 50000529,
+    "dqd_name": "曼城",
+    "qiutan_name": "曼彻斯特城",
+    "qiutan_serial": "26",
+    "league_serial": 36,
+    "league_slug": "epl",
+    "match_league_name": "英超"
+  }
+]
 ```
 
-`teams` 是球队映射列表：`dqd_id` 和 `dqd_name` 来自懂球帝，`qiutan_name` 和 `qiutan_serial` 来自球探；`league_serial`、`league_slug`、`match_league_name` 描述所属联赛。完整的 20 条配置已经写入文件。
+JSON 顶层必须是球队对象数组。`dqd_id` 和 `dqd_name` 来自懂球帝，`qiutan_name` 和 `qiutan_serial` 来自球探；`league_serial`、`league_slug`、`match_league_name` 描述所属联赛。当前文件包含 20 支英超球队，仍无法覆盖所有球队。遇到映射缺失时程序会报错并提示在 `teams.json` 中补齐该球队映射，然后重新运行 `db-init`。
 
 ## 初始化 SQLite
 
@@ -110,7 +111,9 @@ python -m dqd_scroll schedule-report --database data/dqd_scroll.sqlite3 --team-i
 python -m dqd_scroll daily-report --database data/dqd_scroll.sqlite3 --team-id 50000529 --as-of 2026-10-25
 ```
 
-`db-init` 只在初始化或更新球队映射时读取 `config.toml`，不访问懂球帝。它会把配置里的球队映射写入 `teams`，创建人员表 `players` 和人员关联表 `team_players`，并创建 `league_seasons` 与 `team_schedules`。`league_seasons` 通过 `(league_serial, season)` 建立联赛与赛季的关系；每个 `league_serial` 只保留当前最新赛季。数据库字段统一使用下划线命名，例如 `league_serial`、`league_slug`、`match_league_name`、`season_sort` 和 `team_a_id`。重复运行会按懂球帝球队 ID 更新配置映射，不会重复插入球队。数据库文件位于 `data/`，不会提交到版本库。名单导入、赛程导入和赛程报告命令直接接收 `--database`，球队名称和联赛编号都从 SQLite 的 `teams` 表读取；路径不存在时会报错，不会创建空数据库。
+`db-init` 读取项目根目录 `teams.json`，不访问懂球帝。它会把球队映射写入 `teams`，创建人员表 `players` 和人员关联表 `team_players`，并创建 `league_seasons` 与 `team_schedules`。`league_seasons` 通过 `(league_serial, season)` 建立联赛与赛季的关系；每个 `league_serial` 只保留当前最新赛季。数据库字段统一使用下划线命名，例如 `league_serial`、`league_slug`、`match_league_name`、`season_sort` 和 `team_a_id`。重复运行会按懂球帝球队 ID 更新映射，不会重复插入球队。数据库文件位于 `data/`，不会提交到版本库。名单导入、赛程导入和赛程报告命令直接接收 `--database`，球队名称和联赛编号都从 SQLite 的 `teams` 表读取；路径不存在时会报错，不会创建空数据库。
+
+`teams.json` 只包含球队及联赛映射，不包含球员名单或赛程。新机器运行安装初始化后会得到 `teams` 表，但需要再用对应的名单、赛程样本运行 `roster-import` 和 `schedule-import`；其他机器已有的 `data/` SQLite 文件不会随代码仓库同步。
 
 `roster-import` 使用 `--database` 指定已初始化的数据库，并读取本地 JSON 响应文件，不会访问懂球帝；导入前会确认球队已存在于 SQLite。它会校验人员 ID、姓名和 `attr`，在同一事务中刷新 `players` 人员资料并替换指定球队的 `team_players` 关联。`players.attr` 保存球员位置（前锋、中场、后卫、门将）；主教练也保存为一条人员记录，`attr` 为“主教练”。未来实现在线名单请求后，每次请求成功也要走同一同步流程，转会或更名才会反映到数据库。当前附带的是一份历史响应样本，导入它只会把数据库更新到该样本记录的名单状态，不代表懂球帝当前名单。
 
@@ -122,19 +125,18 @@ python -m dqd_scroll daily-report --database data/dqd_scroll.sqlite3 --team-id 5
 
 ## 球队动态日报
 
-球队名称、动态兴趣词和插件调度设置保存在 `config.toml` 的 `[dynamics]` 中。DSH 设置 → 刷懂球帝可逐行填写关注球队和关注内容，并编辑每日运行时间。球队名称必须与上方 `[[teams]]` 中的 `dqd_name` 完全一致；程序会用该名称找到对应 `dqd_id`。填写多个名称后会逐队抓取，每支球队单独生成两份报告：`out/dynamics/<日期>/<懂球帝球队名称>-all.md` 保存所选时间范围内的全部动态；`out/dynamics/<日期>/<懂球帝球队名称>-interests.md` 只保存命中兴趣词的动态。
+球队名称、动态兴趣词和插件调度设置保存在 `config.toml` 的 `[dynamics]` 中。DSH 设置 → 刷懂球帝可逐行填写关注球队和关注内容，并编辑每日运行时间。球队名称必须与 `teams.json` 中的 `dqd_name` 完全一致；程序会用该名称找到对应 `dqd_id`。填写多个名称后会逐队抓取，每支球队单独生成两份报告：`out/dynamics/<日期>/<懂球帝球队名称>-all.md` 保存所选时间范围内的全部动态；`out/dynamics/<日期>/<懂球帝球队名称>-interests.md` 只保存命中兴趣词的动态。
 
-关注内容任一关键词出现在动态标题、描述或正文中，该条动态就会进入兴趣命中报告。时间按 `Asia/Shanghai` 解释；保存后调度器下一分钟检查时读取新设置。关注球队至少填一支；兴趣列表留空会暂停自动日报，手动运行时报错，不会自动放宽为全量动态。Python 可执行文件仍通过 `python_path` 配置。
+关注内容任一关键词出现在动态标题、描述或正文中，该条动态就会进入兴趣命中报告。时间按 `Asia/Shanghai` 解释；保存后调度器下一分钟检查时读取新设置。关注球队至少填一支；兴趣列表留空会暂停自动日报，手动运行时报错，不会自动放宽为全量动态。Python 解释器路径保存在各自机器的 DSH 数据目录，不写入项目配置。
 
 ```toml
 [dynamics]
-team_names = ['曼城', '阿森纳'] # 名称需与 teams[].dqd_name 完全一致
+team_names = ['曼城', '阿森纳'] # 名称需与 teams.json 中的 dqd_name 完全一致
 interests = ['伤病', '训练'] # 示例；请替换成你要关注的关键词
 daily_run_time = '21:00'
-python_path = 'C:/ProgramData/miniconda3/python.exe'
 ```
 
-DSH 设置页的“关注球队（每行一个懂球帝球队名称）”会写入 `team_names`。可选名称来自 `config.toml` 已配置的 `[[teams]]` 清单；名称不匹配或重复时会报错，不会猜测球队 ID。
+DSH 设置页的“关注球队（每行一个懂球帝球队名称）”会写入 `team_names`。可选名称来自 `teams.json`；名称不匹配或重复时会报错，不会猜测球队 ID。
 
 如果运行日报时提示“请先在 config.toml 的 dynamics.interests 中配置关注内容”，说明 `interests` 还是空列表 `[]`。打开项目根目录的 `config.toml`，在 `[dynamics]` 下把它改成非空关键词列表；每个词用单引号括起来，多个词用逗号分隔。上面的“伤病”和“训练”只是填写格式示例，请换成你自己的关注词。任意一个词出现在动态标题、描述或正文中，该条动态就会进入日报。保存配置后重新运行日报命令。
 
@@ -152,7 +154,7 @@ python -m dqd_scroll dynamics-report --config config.toml --since 2026-10-24T11:
 
 时间按上海本地时间解释，起止时间都包含在筛选范围内。每支球队都从最新页开始采集，用动态的 `show_time` 筛选；只有 `data.next.after` 和当前整页的 `show_time` 都早于 `--since` 时才停止。每支球队最多请求 50 页；到达上限仍未到开始时间时，该队报告会标记为不完整。重复 `data.next` 会立即报错停止。动态内容只在内存处理，报告按日期和球队名称分开放入 `out/dynamics/<日期>/`；每支球队各有 `-all.md` 和 `-interests.md` 两个文件。SQLite 中没有动态表，也不会保存原始接口响应。
 
-DSH 插件必须保持运行，才能在 `daily_run_time` 到达后启动日报 CLI。插件只在 `data/dynamics-schedule-state.json` 记录当天是否已成功生成日报，不保存动态内容；命令失败时会在下一分钟重试。手动命令不依赖 DSH 定时器。
+DSH 插件必须保持运行，才能在 `daily_run_time` 到达后启动日报 CLI。插件只在 DSH 本机数据目录记录当天是否已成功生成日报和当前 Python 环境路径，不保存动态内容；命令失败时会在下一分钟重试。手动命令不依赖 DSH 定时器。
 
 设置页的“刷新 LDPlayer mitmproxy CA”按钮会调用 `tools/refresh-dqd-mitm-ca.ps1`，执行前会显示确认。它要求 LDPlayer14 的 `emulator-5556` 在线并可用 root，且本机 mitmproxy CA 的 DER SHA-256 与脚本内固定值一致；证书挂载在模拟器重启后失效。脚本仅用于 Windows 本机维护，不是日报调度的一部分。
 
@@ -168,12 +170,13 @@ DSH 插件必须保持运行，才能在 `daily_run_time` 到达后启动日报 
 ## 项目结构
 
 ```text
-config.toml                 db-init 的球队映射、SQLite 文件路径与动态日报用户偏好
+config.toml                 SQLite 文件路径与动态日报用户偏好
+teams.json                  随项目分发的球队映射种子数据
 package.json                Python 包与 DSH bundle 元数据
 src/dqd_scroll/
   __main__.py               python -m dqd_scroll 入口
   cli.py                    项目状态、数据库、名单、赛程和动态日报命令
-  config.py                 读取并验证 TOML 配置
+  config.py                 读取并验证 TOML 配置与球队 JSON 种子文件
   repository.py             数据库建表、查询和写入
   models.py                 名单、赛季、赛程与动态记录模型
   workflow.py               串联接口请求、数据清洗和数据库读写

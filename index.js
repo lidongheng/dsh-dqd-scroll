@@ -12,10 +12,21 @@ export const inject = ['webServer'];
 export function apply(ctx) {
   const projectDir = dirname(fileURLToPath(import.meta.url));
   const configPath = join(projectDir, 'config.toml');
-  const statePath = join(projectDir, 'data', 'dynamics-schedule-state.json');
-  ctx.effect(() => registerDqdSettingsApi(ctx, projectDir, configPath), 'dqd-scroll 设置页 API');
+  // Python 环境记录和日报完成状态按机器隔离，避免把本机绝对路径提交到项目配置。
+  const dshHomePath = ctx.get('dshHomePath');
+  let stateDir = '';
+  if (typeof dshHomePath === 'function') stateDir = dshHomePath('dqd-scroll');
+  if (typeof dshHomePath === 'string' && dshHomePath.length > 0) stateDir = join(dshHomePath, 'dqd-scroll');
+  if (typeof stateDir !== 'string' || stateDir.length === 0) {
+    throw new Error('DSH 未提供有效的 dshHomePath，无法确定本机运行环境目录。');
+  }
+  mkdirSync(stateDir, { recursive: true });
+  const statePath = join(stateDir, 'dynamics-schedule-state.json');
+  const pythonEnvironmentPath = join(stateDir, 'python-environment.json');
+  ctx.effect(() => registerDqdSettingsApi(ctx, projectDir, configPath, stateDir), 'dqd-scroll 设置页 API');
   let activeChild = null;
   let missingSettingsNoticeDate = null;
+  let missingPythonNoticeDate = null;
 
   const readDynamicsSchedule = () => {
     const configText = readFileSync(configPath, 'utf8');
@@ -35,7 +46,7 @@ export function apply(ctx) {
       const arrayValue = value.replace(/\s+#.*$/, '').trim();
       if (key === 'team_names') schedule.team_names_configured = !/^\[\s*\]$/.test(arrayValue);
       if (key === 'interests') schedule.interests_configured = !/^\[\s*\]$/.test(arrayValue);
-      if (key === 'daily_run_time' || key === 'python_path') {
+      if (key === 'daily_run_time') {
         if (!value.startsWith("'") || !value.endsWith("'")) {
           throw new Error(`config.toml 的 dynamics.${key} 必须使用单引号字符串`);
         }
@@ -44,9 +55,6 @@ export function apply(ctx) {
     }
     if (typeof schedule.daily_run_time !== 'string' || !/^([01]\d|2[0-3]):[0-5]\d$/.test(schedule.daily_run_time)) {
       throw new Error('config.toml 缺少有效的 dynamics.daily_run_time');
-    }
-    if (typeof schedule.python_path !== 'string' || schedule.python_path.length === 0) {
-      throw new Error('config.toml 缺少有效的 dynamics.python_path');
     }
     return schedule;
   };
@@ -82,13 +90,31 @@ export function apply(ctx) {
         return;
       }
 
+      if (!existsSync(pythonEnvironmentPath)) {
+        if (missingPythonNoticeDate !== now.date) {
+          console.warn('[dqd-scroll] 本机 Python 环境尚未安装；请在“刷懂球帝”设置页点击“安装本机环境”。');
+          missingPythonNoticeDate = now.date;
+        }
+        return;
+      }
+      const pythonEnvironment = JSON.parse(readFileSync(pythonEnvironmentPath, 'utf8'));
+      const pythonPath = pythonEnvironment.pythonPath;
+      if (typeof pythonPath !== 'string' || pythonPath.length === 0 || !existsSync(pythonPath)) {
+        if (missingPythonNoticeDate !== now.date) {
+          console.warn('[dqd-scroll] 本机 Python 环境路径无效；请在“刷懂球帝”设置页重新安装本机环境。');
+          missingPythonNoticeDate = now.date;
+        }
+        return;
+      }
+      missingPythonNoticeDate = null;
+
       const scheduleState = existsSync(statePath)
         ? JSON.parse(readFileSync(statePath, 'utf8'))
         : {};
       if (scheduleState.last_run_date === now.date) return;
 
       activeChild = spawn(
-        schedule.python_path,
+        pythonPath,
         ['-m', 'dqd_scroll', 'dynamics-report', '--config', configPath],
         {
           cwd: projectDir,

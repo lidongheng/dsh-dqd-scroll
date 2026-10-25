@@ -12,6 +12,7 @@
   },
   "files": [
     "config.toml",
+    "teams.json",
     "client.js",
     "cordis.patch.yml",
     "docs/api-contract.md",

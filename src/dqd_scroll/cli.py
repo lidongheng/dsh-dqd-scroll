@@ -18,7 +18,7 @@ def show_status() -> int:
 
 
 def initialize_database(config_path: Path) -> int:
-    # CLI 从 TOML 读取球队映射与数据库位置，不在代码里猜默认值。
+    # CLI 从 TOML 读取数据库位置、从 JSON 读取球队映射，不在代码里猜默认值。
     config = load_config(config_path);
     repository = Repository(config.database_path);
     repository.initialize(config.teams);
